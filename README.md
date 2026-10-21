@@ -167,9 +167,17 @@ This project is licensed under the **[GNU Affero General Public License v3.0 (AG
 
 ---
 
-## ☕ Support the Author
+## ☕ Support the Author & Contributing
 
 If this project saved you hundreds of dollars on Odoo IoT Boxes or hours of developer frustration:
 
 * ⭐ **Star this repository** on GitHub!
-* ☕ **[Buy Me a Coffee](https://www.buymeacoffee.com)** or sponsor via **[GitHub Sponsors](https://github.com/sponsors)**.
+* 💖 **[Sponsor on GitHub Sponsors](https://github.com/sponsors/oraclecow)** to support maintenance and future Odoo version updates.
+
+### 🛠️ Behind the Code & Community Contributions
+This application was created by a retail business owner pairing with **Google Antigravity (AG)** to solve real-world cashier latency, memory bloat, and thermal printing challenges in live store operations.
+
+* **Operational Reality:** I am a business owner with an IT hobby/background, not a full-time software developer. The application was built from a practical, store-floor operational perspective to get the job done reliably on budget hardware.
+* **Code Contributions Welcomed:** While the app runs daily in live production with zero crashes and passes standard Dart analysis, performance profiling, architectural refactoring, and code cleanup from seasoned Flutter/Dart developers are warmly welcomed!
+* If you see areas where state management, widget trees, or networking can be optimized or tightened, please feel free to open an issue or submit a pull request!
+
