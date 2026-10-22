@@ -6,7 +6,7 @@
   "release_date": "2026-10-12",
   "release_notes": [
     "Initial Open Odoo POS Release",
-    "Branded all customer receipts and test prints with Pick A Juice logo",
+    "Modular receipt templates driven by receipt_config.json (optional standard Odoo format)",
     "Added on-screen logo branding on order tickets and dialogs",
     "Full English translation of all POS cashier dialogs"
   ]

@@ -7,11 +7,15 @@ import 'customer_keypad_dialog.dart';
 import 'order_note_dialog.dart';
 import 'cashier_action_menu.dart';
 import 'payment_dialog.dart';
+import 'admin_pin_dialog.dart';
+import 'discount_dialog.dart';
+import 'point_exchange_dialog.dart';
 import 'cart_item_adjust_dialog.dart';
 import 'cart_item_quantity_dialog.dart';
 import 'cashier_select_dialog.dart';
 import 'open_session_dialog.dart';
 import 'order_tabs_bar.dart';
+import 'order_type_dialog.dart';
 import '../../data/services/printer/printer_service.dart';
 import '../../data/models/order.dart';
 
@@ -214,64 +218,104 @@ class OrderTicketPanel extends ConsumerWidget {
                 ),
                 const SizedBox(width: 8),
 
-                // Member / Pelanggan Pill (Replaces Restaurant Order Channel)
-                InkWell(
-                  onTap: () {
-                    showDialog(
-                      context: context,
-                      builder: (ctx) => CustomerKeypadDialog(
-                        repository: repo,
-                        posController: controller,
-                        currentCustomer: controller.customer,
-                        onClearCustomer: () => controller.setCustomer(null),
-                        onCustomerSelected: (cust) => controller.setCustomer(cust),
-                      ),
-                    );
-                  },
-                  borderRadius: BorderRadius.circular(8),
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                    decoration: BoxDecoration(
-                      color: controller.customer != null ? AppColors.sunYellow : AppColors.cartRow,
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(
-                        color: controller.customer != null ? AppColors.borderDark : AppColors.cartRowBorder,
-                        width: 1.5,
-                      ),
-                      boxShadow: const [
-                        BoxShadow(color: Colors.black26, blurRadius: 4, offset: Offset(0, 1)),
-                      ],
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          Icons.card_membership_rounded,
-                          size: 15,
-                          color: controller.customer != null ? AppColors.pitchBlack : AppColors.sunYellow,
+                // Mode-Aware Pill: Order Channel (FnB) vs Member (Retail)
+                if (controller.guardrails.enableOrderChannels)
+                  InkWell(
+                    onTap: () {
+                      showDialog(
+                        context: context,
+                        builder: (ctx) => OrderTypeDialog(
+                          currentChannel: controller.channel,
+                          onChannelSelected: (type, pin) => controller.setOrderChannel(type, pin),
                         ),
-                        const SizedBox(width: 5),
-                        Text(
-                          controller.customer != null
-                              ? '${controller.customer!.name} (${controller.customer!.pointsDisplay} pts)'
-                              : '+ Member',
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w800,
-                            color: controller.customer != null ? AppColors.pitchBlack : Colors.white,
-                          ),
-                        ),
-                        if (controller.customer != null) ...[
-                          const SizedBox(width: 4),
-                          GestureDetector(
-                            onTap: () => controller.setCustomer(null),
-                            child: const Icon(Icons.cancel_rounded, size: 14, color: AppColors.pitchBlack),
-                          ),
+                      );
+                    },
+                    borderRadius: BorderRadius.circular(8),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: AppColors.sunYellow,
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(color: AppColors.borderDark, width: 1.5),
+                        boxShadow: const [
+                          BoxShadow(color: Colors.black26, blurRadius: 4, offset: Offset(0, 1)),
                         ],
-                      ],
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            controller.channel.displayName,
+                            style: const TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w800,
+                              color: AppColors.pitchBlack,
+                            ),
+                          ),
+                          const SizedBox(width: 4),
+                          const Icon(Icons.keyboard_arrow_down_rounded, size: 16, color: AppColors.pitchBlack),
+                        ],
+                      ),
+                    ),
+                  )
+                else
+                  InkWell(
+                    onTap: () {
+                      showDialog(
+                        context: context,
+                        builder: (ctx) => CustomerKeypadDialog(
+                          repository: repo,
+                          posController: controller,
+                          currentCustomer: controller.customer,
+                          onClearCustomer: () => controller.setCustomer(null),
+                          onCustomerSelected: (cust) => controller.setCustomer(cust),
+                        ),
+                      );
+                    },
+                    borderRadius: BorderRadius.circular(8),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: controller.customer != null ? AppColors.sunYellow : AppColors.cartRow,
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(
+                          color: controller.customer != null ? AppColors.borderDark : AppColors.cartRowBorder,
+                          width: 1.5,
+                        ),
+                        boxShadow: const [
+                          BoxShadow(color: Colors.black26, blurRadius: 4, offset: Offset(0, 1)),
+                        ],
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.card_membership_rounded,
+                            size: 15,
+                            color: controller.customer != null ? AppColors.pitchBlack : AppColors.sunYellow,
+                          ),
+                          const SizedBox(width: 5),
+                          Text(
+                            controller.customer != null
+                                ? '${controller.customer!.name} (${controller.customer!.pointsDisplay} pts)'
+                                : '+ Member',
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w800,
+                              color: controller.customer != null ? AppColors.pitchBlack : Colors.white,
+                            ),
+                          ),
+                          if (controller.customer != null) ...[
+                            const SizedBox(width: 4),
+                            GestureDetector(
+                              onTap: () => controller.setCustomer(null),
+                              child: const Icon(Icons.cancel_rounded, size: 14, color: AppColors.pitchBlack),
+                            ),
+                          ],
+                        ],
+                      ),
                     ),
                   ),
-                ),
               ],
             ),
           ),
@@ -769,6 +813,9 @@ class OrderTicketPanel extends ConsumerWidget {
                               final completedItems = List<CartItem>.from(controller.cartItems);
                               final completedTotal = controller.total;
                               final completedCustomer = controller.customer;
+                              final completedChannelName = controller.channel.cleanDisplayName;
+                              final completedNote = controller.orderNote;
+                              final enableKitchenSlip = controller.guardrails.enableKitchenSlip;
                               final savedOrderNum = controller.orderNumber;
                               final cashierName = controller.activeCashier?.name ?? 'Staff';
                               final finalMethod = paymentResult.paymentMethod;
@@ -791,14 +838,21 @@ class OrderTicketPanel extends ConsumerWidget {
                                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
                                   title: Row(
                                     children: [
-                                      Image.asset('assets/images/store_logo.png', height: 38, fit: BoxFit.contain),
+                                      Image.asset(
+                                        'assets/images/store_logo.png',
+                                        height: 38,
+                                        fit: BoxFit.contain,
+                                      ),
                                       const SizedBox(width: 10),
                                       Column(
                                         crossAxisAlignment: CrossAxisAlignment.start,
                                         children: [
                                           Text(completedTotal < 0 ? 'Refund Successful!' : 'Order Successful!',
                                               style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                                          const Text('OPEN ODOO POS', style: TextStyle(fontSize: 11, color: AppColors.primaryRed, fontWeight: FontWeight.bold)),
+                                          Text(
+                                            'OPEN ODOO POS',
+                                            style: const TextStyle(fontSize: 11, color: AppColors.primaryRed, fontWeight: FontWeight.bold),
+                                          ),
                                         ],
                                       ),
                                     ],
@@ -825,7 +879,9 @@ class OrderTicketPanel extends ConsumerWidget {
                                             Expanded(
                                               child: Text(
                                                 printerService.settings.autoPrintReceipt
-                                                    ? 'Mencetak struk kasir...'
+                                                    ? (enableKitchenSlip && printerService.settings.autoPrintKitchen
+                                                        ? 'Mencetak struk kasir & tiket barista...'
+                                                        : 'Mencetak struk kasir...')
                                                     : 'Auto-print non-aktif.',
                                                 style: TextStyle(fontSize: 12, color: Colors.green.shade900, fontWeight: FontWeight.w600),
                                               ),
@@ -870,6 +926,30 @@ class OrderTicketPanel extends ConsumerWidget {
                                         }
                                       },
                                     ),
+                                    if (enableKitchenSlip)
+                                      OutlinedButton.icon(
+                                        icon: const Icon(Icons.restaurant_menu_rounded, size: 16),
+                                        label: const Text('Tiket Barista'),
+                                        onPressed: () async {
+                                          final res = await printerService.printKitchenSlip(
+                                            orderNumber: savedOrderNum,
+                                            posReference: posReference,
+                                            trackingNumber: trackingNumber,
+                                            items: completedItems,
+                                            channelName: completedChannelName,
+                                            note: completedNote,
+                                            cashierName: cashierName,
+                                          );
+                                          if (context.mounted) {
+                                            ScaffoldMessenger.of(context).showSnackBar(
+                                              SnackBar(
+                                                content: Text(res['message'] ?? 'Kitchen slip sent.'),
+                                                backgroundColor: res['success'] == true ? Colors.green : Colors.red,
+                                              ),
+                                            );
+                                          }
+                                        },
+                                      ),
                                     OutlinedButton.icon(
                                       icon: const Icon(Icons.point_of_sale_rounded, size: 16),
                                       label: const Text('Buka Laci'),
@@ -920,8 +1000,21 @@ class OrderTicketPanel extends ConsumerWidget {
                                       cashierName: cashierName,
                                       storeName: odooClient.profile.displayName.replaceAll(RegExp(r'\(.*?\)'), '').trim(),
                                       companyId: odooClient.profile.companyId,
-                                      customHeader: odooClient.profile.receiptHeader,
-                                      customFooter: odooClient.profile.receiptFooter,
+                                          customHeader: odooClient.profile.receiptHeader,
+                                          customFooter: odooClient.profile.receiptFooter,
+                                    );
+                                  }
+
+                                  if (enableKitchenSlip && printerService.settings.autoPrintKitchen) {
+                                    await Future.delayed(const Duration(milliseconds: 450));
+                                    await printerService.printKitchenSlip(
+                                      orderNumber: savedOrderNum,
+                                      posReference: posReference,
+                                      trackingNumber: trackingNumber,
+                                      items: completedItems,
+                                      channelName: completedChannelName,
+                                      note: completedNote,
+                                      cashierName: cashierName,
                                     );
                                   }
                                 } catch (printErr) {

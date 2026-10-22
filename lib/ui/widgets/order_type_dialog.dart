@@ -20,11 +20,12 @@ class OrderTypeDialog extends StatelessWidget {
         title: Text(title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
         content: TextField(
           controller: controller,
-          keyboardType: TextInputType.number,
-          maxLength: 4,
+          keyboardType: TextInputType.text,
+          textCapitalization: TextCapitalization.characters,
+          maxLength: 10,
           autofocus: true,
           decoration: const InputDecoration(
-            hintText: 'Masukkan 4 digit (misal: 4821)',
+            hintText: 'Masukkan Order ID / PIN (maks 10 karakter)',
             border: OutlineInputBorder(),
           ),
         ),
@@ -77,14 +78,14 @@ class OrderTypeDialog extends StatelessWidget {
           onPressed: () => _promptPin(context, OrderChannelType.grabFood, 'GrabFood Order ID'),
           child: const Padding(
             padding: EdgeInsets.symmetric(vertical: 4.0),
-            child: Text('🟢 GrabFood (4 Digit ID)', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
+            child: Text('🟢 GrabFood (Order ID)', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
           ),
         ),
         SimpleDialogOption(
           onPressed: () => _promptPin(context, OrderChannelType.shopeeFood, 'ShopeeFood Order ID'),
           child: const Padding(
             padding: EdgeInsets.symmetric(vertical: 4.0),
-            child: Text('🟠 ShopeeFood (4 Digit ID)', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
+            child: Text('🟠 ShopeeFood (Order ID)', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
           ),
         ),
       ],

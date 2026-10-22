@@ -76,7 +76,7 @@ class CashierActionMenu {
                   icon: Icons.badge_rounded,
                   iconColor: Colors.teal,
                   title: 'Cashier (Ganti Kasir)',
-                  subtitle: 'Active: ${controller.activeCashier?.name ?? "Ainun"} (Tap to switch)',
+                  subtitle: 'Active: ${controller.activeCashier?.name ?? "Cashier"} (Tap to switch)',
                   trailing: Container(
                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                     decoration: BoxDecoration(

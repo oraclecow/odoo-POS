@@ -1,0 +1,22 @@
+{
+  "default_odoo_url": "http://localhost:8069",
+  "default_database": "odoo",
+  "profiles": [
+    {
+      "display_name": "Retail Counter 1",
+      "login": "admin",
+      "password": "",
+      "company_id": 1,
+      "pos_config_id": 1,
+      "mode": "retail"
+    },
+    {
+      "display_name": "Cafe Counter 1",
+      "login": "admin",
+      "password": "",
+      "company_id": 1,
+      "pos_config_id": 2,
+      "mode": "fnb"
+    }
+  ]
+}

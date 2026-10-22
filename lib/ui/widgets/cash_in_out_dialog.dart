@@ -107,7 +107,7 @@ class _CashInOutDialogState extends State<CashInOutDialog> {
         : _reasonController.text.trim();
 
     setState(() => _isSubmitting = true);
-    final cashierName = widget.controller.activeCashier?.name ?? 'Ainun';
+    final cashierName = widget.controller.activeCashier?.name ?? 'Cashier';
 
     try {
       // 1. Submit to Odoo 19 pos.session
@@ -160,7 +160,7 @@ class _CashInOutDialogState extends State<CashInOutDialog> {
 
   @override
   Widget build(BuildContext context) {
-    final cashierName = widget.controller.activeCashier?.name ?? 'Ainun';
+    final cashierName = widget.controller.activeCashier?.name ?? 'Cashier';
     final isOut = _type == 'out';
 
     return Dialog(

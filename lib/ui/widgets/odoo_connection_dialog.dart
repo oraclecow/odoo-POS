@@ -30,6 +30,7 @@ class _OdooConnectionDialogState extends State<OdooConnectionDialog> {
   late TextEditingController _receiptFooterController;
   final TextEditingController _pinController = TextEditingController();
 
+  late PosBusinessMode _mode;
   bool _obscurePassword = true;
   bool _isLoading = false;
   String? _statusMessage;
@@ -39,6 +40,7 @@ class _OdooConnectionDialogState extends State<OdooConnectionDialog> {
   void initState() {
     super.initState();
     final profile = widget.odooClient.profile;
+    _mode = profile.mode;
     _urlController = TextEditingController(text: widget.odooClient.baseUrl);
     _dbController = TextEditingController(text: widget.odooClient.database);
     _loginController = TextEditingController(text: profile.login);
@@ -102,6 +104,7 @@ class _OdooConnectionDialogState extends State<OdooConnectionDialog> {
         posConfigId: posConfigId,
         receiptHeader: receiptHeader,
         receiptFooter: receiptFooter,
+        mode: _mode,
       );
       widget.odooClient.switchProfile(newProfile);
 
@@ -292,6 +295,18 @@ class _OdooConnectionDialogState extends State<OdooConnectionDialog> {
                     ),
                   ),
                 ],
+              ),
+              const SizedBox(height: 12),
+
+              const Text('Business Mode', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppColors.textSecondary)),
+              const SizedBox(height: 4),
+              SegmentedButton<PosBusinessMode>(
+                segments: const [
+                  ButtonSegment(value: PosBusinessMode.retail, label: Text('Retail / Shop'), icon: Icon(Icons.shopping_basket_outlined)),
+                  ButtonSegment(value: PosBusinessMode.fnb, label: Text('F&B / Restaurant'), icon: Icon(Icons.restaurant_rounded)),
+                ],
+                selected: {_mode},
+                onSelectionChanged: (v) => setState(() => _mode = v.first),
               ),
               const SizedBox(height: 12),
 

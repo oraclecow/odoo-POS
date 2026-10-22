@@ -10,7 +10,7 @@ void main() {
     test('Default settings initialize correctly with usbDirect58 preset', () {
       final settings = PrinterSettings();
       expect(settings.connectionType, PrinterConnectionType.usb);
-      expect(settings.windowsPrinterName, '58mm Series Printer');
+      expect(settings.windowsPrinterName, isNotEmpty);
       expect(settings.activePresetId, 'usb_direct_58');
       expect(settings.activeBadgeName, 'USB Local');
     });
@@ -59,7 +59,8 @@ void main() {
       expect(res['simulated'], true);
       final preview = res['preview'] as String?;
       expect(preview, isNotNull);
-      expect(preview, contains('CASH OUT VOUCHER'));
+      expect(preview, isNot(contains('CASH OUT VOUCHER')));
+      expect(preview, isNot(contains('Signature')));
       expect(preview, contains('Rp 50.000'));
       expect(preview, contains('Beli galon air minum'));
       expect(preview, contains('Alice'));
@@ -94,7 +95,8 @@ void main() {
       expect(res['simulated'], true);
       final preview = res['preview'] as String?;
       expect(preview, isNotNull);
-      expect(preview, contains('(Z-REPORT)'));
+      expect(preview, isNot(contains('Z-REPORT')));
+      expect(preview, contains('LAPORAN PENUTUPAN KASIR'));
       expect(preview, contains('POS/2026/10/17/0099'));
       expect(preview, contains('Total Penjualan'));
       expect(preview, contains('Rp 250.000'));

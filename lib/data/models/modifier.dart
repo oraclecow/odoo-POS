@@ -31,6 +31,8 @@ class SelectedModifiers {
     this.addOns = const [],
   });
 
+  List<AddOnOption> get selectedAddOns => addOns;
+
   int get extraPriceTotal {
     return addOns.fold(0, (sum, item) => sum + item.extraPrice);
   }

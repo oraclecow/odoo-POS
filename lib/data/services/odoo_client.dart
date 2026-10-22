@@ -4,331 +4,17 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uuid/uuid.dart';
+import '../../core/config/app_mode.dart';
+import '../../core/models/odoo_pos_models.dart';
+import '../../modules/pos_receipt/receipt_config.dart';
 import '../models/juice_product.dart';
 import '../models/modifier.dart';
 import '../models/customer.dart';
 import '../models/order.dart';
 
-class OdooCompanyProfile {
-  final String displayName;
-  final String login;
-  final String password;
-  final int companyId;
-  final int posConfigId;
-  final String receiptHeader;
-  final String receiptFooter;
+export '../../core/config/app_mode.dart';
+export '../../core/models/odoo_pos_models.dart';
 
-  const OdooCompanyProfile({
-    required this.displayName,
-    required this.login,
-    required this.password,
-    required this.companyId,
-    required this.posConfigId,
-    this.receiptHeader = 'Point of Sale Receipt',
-    this.receiptFooter = 'Thank you for your business!',
-  });
-
-  static const OdooCompanyProfile defaultDemoProfile = OdooCompanyProfile(
-    displayName: 'Main Store POS',
-    login: 'admin',
-    password: '',
-    companyId: 1,
-    posConfigId: 1,
-    receiptHeader: 'Point of Sale Receipt',
-    receiptFooter: 'Thank you for your business!',
-  );
-
-  Map<String, dynamic> toMap() => {
-    'displayName': displayName,
-    'login': login,
-    'password': password,
-    'companyId': companyId,
-    'posConfigId': posConfigId,
-    'receiptHeader': receiptHeader,
-    'receiptFooter': receiptFooter,
-  };
-
-  factory OdooCompanyProfile.fromMap(Map<String, dynamic> map) => OdooCompanyProfile(
-    displayName: map['displayName'] ?? 'Main Store POS',
-    login: map['login'] ?? 'admin',
-    password: map['password'] ?? '',
-    companyId: map['companyId'] ?? 1,
-    posConfigId: map['posConfigId'] ?? 1,
-    receiptHeader: map['receiptHeader'] ?? 'Point of Sale Receipt',
-    receiptFooter: map['receiptFooter'] ?? 'Thank you for your business!',
-  );
-}
-
-class OdooOrderRecord {
-  final int id;
-  final String name;
-  final String posReference;
-  final String dateOrder;
-  final double amountTotal;
-  final String partnerName;
-  final String state;
-
-  const OdooOrderRecord({
-    required this.id,
-    required this.name,
-    required this.posReference,
-    required this.dateOrder,
-    required this.amountTotal,
-    required this.partnerName,
-    required this.state,
-  });
-
-  String get localDateOrder {
-    if (dateOrder.isEmpty) return '';
-    try {
-      final normalized = dateOrder.contains('T') ? dateOrder : dateOrder.replaceFirst(' ', 'T');
-      final utcDate = DateTime.parse(normalized.endsWith('Z') ? normalized : '${normalized}Z');
-      final local = utcDate.toLocal();
-      final y = local.year.toString().padLeft(4, '0');
-      final m = local.month.toString().padLeft(2, '0');
-      final d = local.day.toString().padLeft(2, '0');
-      final hh = local.hour.toString().padLeft(2, '0');
-      final mm = local.minute.toString().padLeft(2, '0');
-      final ss = local.second.toString().padLeft(2, '0');
-      return '$y-$m-$d $hh:$mm:$ss';
-    } catch (_) {
-      return dateOrder;
-    }
-  }
-}
-
-class PosCashier {
-  final int id;
-  final String name;
-  final int? userId;
-  final bool hasPin;
-  final String? pin;
-
-  const PosCashier({
-    required this.id,
-    required this.name,
-    this.userId,
-    this.hasPin = false,
-    this.pin,
-  });
-
-  Map<String, dynamic> toJson() => {
-        'id': id,
-        'name': name,
-        'user_id': userId,
-        'has_pin': hasPin,
-      };
-
-  factory PosCashier.fromJson(Map<String, dynamic> json) => PosCashier(
-        id: json['id'] as int,
-        name: json['name'] as String,
-        userId: json['user_id'] as int?,
-        hasPin: json['has_pin'] as bool? ?? false,
-        pin: json['pin'] as String?,
-      );
-
-  String get initials {
-    final parts = name.trim().split(RegExp(r'\s+'));
-    if (parts.isEmpty || parts[0].isEmpty) return '?';
-    if (parts.length == 1) return parts[0].substring(0, 1).toUpperCase();
-    return '${parts[0][0]}${parts[1][0]}'.toUpperCase();
-  }
-}
-
-class PosNonCashPaymentMethod {
-  final int id;
-  final String name;
-  final double amount;
-  final int number;
-  final String type;
-
-  const PosNonCashPaymentMethod({
-    required this.id,
-    required this.name,
-    required this.amount,
-    required this.number,
-    required this.type,
-  });
-
-  factory PosNonCashPaymentMethod.fromJson(Map<String, dynamic> json) => PosNonCashPaymentMethod(
-        id: json['id'] as int? ?? 0,
-        name: json['name'] as String? ?? '',
-        amount: (json['amount'] as num?)?.toDouble() ?? 0.0,
-        number: (json['number'] as num?)?.toInt() ?? 0,
-        type: json['type'] as String? ?? 'bank',
-      );
-}
-
-class PosClosingControlData {
-  final int orderCount;
-  final double totalSales;
-  final String openingNotes;
-  final double openingCash;
-  final double cashPayments;
-  final double cashMovesTotal;
-  final List<Map<String, dynamic>> cashMoves;
-  final double expectedCash;
-  final List<PosNonCashPaymentMethod> nonCashMethods;
-  final bool isManager;
-
-  const PosClosingControlData({
-    required this.orderCount,
-    required this.totalSales,
-    required this.openingNotes,
-    required this.openingCash,
-    required this.cashPayments,
-    required this.cashMovesTotal,
-    required this.cashMoves,
-    required this.expectedCash,
-    required this.nonCashMethods,
-    this.isManager = false,
-  });
-
-  factory PosClosingControlData.fromJson(Map<String, dynamic> json) {
-    final orders = json['orders_details'] as Map<String, dynamic>? ?? {};
-    final cash = json['default_cash_details'] as Map<String, dynamic>? ?? {};
-    final movesList = (cash['moves'] as List<dynamic>? ?? [])
-        .map((m) => m as Map<String, dynamic>)
-        .toList();
-
-    double movesSum = 0.0;
-    for (final m in movesList) {
-      movesSum += (m['amount'] as num?)?.toDouble() ?? 0.0;
-    }
-
-    final nonCashList = (json['non_cash_payment_methods'] as List<dynamic>? ?? [])
-        .map((nc) => PosNonCashPaymentMethod.fromJson(nc as Map<String, dynamic>))
-        .toList();
-
-    return PosClosingControlData(
-      orderCount: (orders['quantity'] as num?)?.toInt() ?? 0,
-      totalSales: (orders['amount'] as num?)?.toDouble() ?? 0.0,
-      openingNotes: json['opening_notes'] is String ? (json['opening_notes'] as String) : '',
-      openingCash: (cash['opening'] as num?)?.toDouble() ?? 0.0,
-      cashPayments: (cash['payment_amount'] as num?)?.toDouble() ?? 0.0,
-      cashMovesTotal: movesSum,
-      cashMoves: movesList,
-      expectedCash: (cash['amount'] as num?)?.toDouble() ?? 0.0,
-      nonCashMethods: nonCashList,
-      isManager: json['is_manager'] as bool? ?? false,
-    );
-  }
-}
-
-class PosPaymentMethodInfo {
-  final int id;
-  final String name;
-  final bool isCashCount;
-  final String? type;
-
-  const PosPaymentMethodInfo({
-    required this.id,
-    required this.name,
-    required this.isCashCount,
-    this.type,
-  });
-
-  factory PosPaymentMethodInfo.fromMap(Map<String, dynamic> map) {
-    return PosPaymentMethodInfo(
-      id: (map['id'] as num).toInt(),
-      name: (map['name'] ?? '').toString(),
-      isCashCount: map['is_cash_count'] == true,
-      type: map['type']?.toString(),
-    );
-  }
-}
-
-class StorePaymentRegistry {
-  final int posConfigId;
-  final List<PosPaymentMethodInfo> methods;
-
-  const StorePaymentRegistry({
-    required this.posConfigId,
-    required this.methods,
-  });
-
-  PosPaymentMethodInfo? get cashMethod {
-    for (final m in methods) {
-      if (m.isCashCount || m.type == 'cash') return m;
-    }
-    return methods.isNotEmpty ? methods.first : null;
-  }
-
-  PosPaymentMethodInfo? get qrisOrBankMethod {
-    for (final m in methods) {
-      final lower = m.name.toLowerCase();
-      if ((m.type == 'bank' || lower.contains('qris') || lower.contains('transfer')) &&
-          !lower.contains('grab') &&
-          !lower.contains('shopee')) {
-        return m;
-      }
-    }
-    return null;
-  }
-
-  PosPaymentMethodInfo? get grabMethod {
-    for (final m in methods) {
-      if (m.name.toLowerCase().contains('grab')) return m;
-    }
-    return null;
-  }
-
-  PosPaymentMethodInfo? get shopeeMethod {
-    for (final m in methods) {
-      if (m.name.toLowerCase().contains('shopee')) return m;
-    }
-    return null;
-  }
-
-  PosPaymentMethodInfo? resolveMethod(String requestedChannelOrName) {
-    final lower = requestedChannelOrName.toLowerCase();
-    if (lower.contains('grab')) {
-      return grabMethod;
-    } else if (lower.contains('shopee')) {
-      return shopeeMethod;
-    } else if (lower.contains('transfer') || lower.contains('qris') || lower.contains('bank')) {
-      return qrisOrBankMethod ?? cashMethod;
-    } else {
-      return cashMethod;
-    }
-  }
-}
-
-class PosOrderSubmissionResult {
-  final int? id;
-  final String? name;
-  final String? posReference;
-  final String? trackingNumber;
-  final Map<String, dynamic> raw;
-
-  const PosOrderSubmissionResult({
-    this.id,
-    this.name,
-    this.posReference,
-    this.trackingNumber,
-    required this.raw,
-  });
-
-  factory PosOrderSubmissionResult.fromSyncResult(dynamic result) {
-    if (result is Map<String, dynamic>) {
-      final orders = result['pos.order'];
-      if (orders is List && orders.isNotEmpty) {
-        final first = orders.first;
-        if (first is Map<String, dynamic>) {
-          return PosOrderSubmissionResult(
-            id: (first['id'] as num?)?.toInt(),
-            name: first['name']?.toString(),
-            posReference: first['pos_reference']?.toString(),
-            trackingNumber: first['tracking_number']?.toString(),
-            raw: result,
-          );
-        }
-      }
-      return PosOrderSubmissionResult(raw: result);
-    }
-    return PosOrderSubmissionResult(raw: {'result': result});
-  }
-}
 
 class OdooClient {
   String baseUrl;
@@ -376,6 +62,76 @@ class OdooClient {
     _activeSessionName = null;
     _paymentRegistry = null;
   }
+
+  /// Fetches live receipt header/footer and company info from Odoo 19 `pos.config` and `res.company`.
+  Future<OdooReceiptMetadata> fetchPosReceiptMetadata({int? configId}) async {
+    final targetConfigId = configId ?? profile.posConfigId;
+    try {
+      final configData = await executeKw(
+        'pos.config',
+        'read',
+        [
+          [targetConfigId],
+          ['is_header_or_footer', 'receipt_header', 'receipt_footer', 'company_id'],
+        ],
+      );
+      if (configData is! List || configData.isEmpty) {
+        return const OdooReceiptMetadata();
+      }
+      final cfg = configData.first as Map<String, dynamic>;
+      final isHeaderOrFooter = cfg['is_header_or_footer'] == true;
+      final header = cfg['receipt_header'] is String ? (cfg['receipt_header'] as String).trim() : '';
+      final footer = cfg['receipt_footer'] is String ? (cfg['receipt_footer'] as String).trim() : '';
+
+      String companyName = '';
+      String street = '';
+      String city = '';
+      String phone = '';
+      String vat = '';
+      String email = '';
+      String website = '';
+
+      final compField = cfg['company_id'];
+      final int compId = (compField is List && compField.isNotEmpty)
+          ? (compField.first as num).toInt()
+          : profile.companyId;
+
+      final compData = await executeKw(
+        'res.company',
+        'read',
+        [
+          [compId],
+          ['name', 'street', 'city', 'phone', 'vat', 'email', 'website'],
+        ],
+      );
+      if (compData is List && compData.isNotEmpty) {
+        final comp = compData.first as Map<String, dynamic>;
+        companyName = comp['name'] is String ? (comp['name'] as String).trim() : '';
+        street = comp['street'] is String ? (comp['street'] as String).trim() : '';
+        city = comp['city'] is String ? (comp['city'] as String).trim() : '';
+        phone = comp['phone'] is String ? (comp['phone'] as String).trim() : '';
+        vat = comp['vat'] is String ? (comp['vat'] as String).trim() : '';
+        email = comp['email'] is String ? (comp['email'] as String).trim() : '';
+        website = comp['website'] is String ? (comp['website'] as String).trim() : '';
+      }
+
+      return OdooReceiptMetadata(
+        companyName: companyName,
+        street: street,
+        city: city,
+        phone: phone,
+        vat: vat,
+        email: email,
+        website: website,
+        isHeaderOrFooter: isHeaderOrFooter,
+        receiptHeader: header,
+        receiptFooter: footer,
+      );
+    } catch (_) {
+      return const OdooReceiptMetadata();
+    }
+  }
+
 
   Future<StorePaymentRegistry> fetchPaymentMethods({int? configId}) async {
     final targetConfigId = configId ?? profile.posConfigId;
@@ -853,6 +609,50 @@ class OdooClient {
     return 10;
   }
 
+  /// F&B mode: resolves delivery-channel pricelists (name contains "grab"/"shopee").
+  Future<Map<String, Map<int, int>>> fetchPricelistMaps() async {
+    final map = <String, Map<int, int>>{'grab': {}, 'shopee': {}};
+    if (profile.isRetail) return map;
+    try {
+      final lists = await executeKw(
+        'product.pricelist',
+        'search_read',
+        [[]],
+        {'fields': ['id', 'name'], 'limit': 100},
+      ) as List<dynamic>;
+      final idToChannel = <int, String>{};
+      for (final l in lists) {
+        final n = (l['name'] ?? '').toString().toLowerCase();
+        if (n.contains('grab')) idToChannel[l['id'] as int] = 'grab';
+        if (n.contains('shopee')) idToChannel[l['id'] as int] = 'shopee';
+      }
+      if (idToChannel.isEmpty) return map;
+      final items = await executeKw(
+        'product.pricelist.item',
+        'search_read',
+        [[['pricelist_id', 'in', idToChannel.keys.toList()]]],
+        {'fields': ['pricelist_id', 'product_tmpl_id', 'product_id', 'fixed_price'], 'limit': 2000},
+      ) as List<dynamic>;
+      for (final it in items) {
+        final plRaw = it['pricelist_id'];
+        final plId = plRaw is List ? (plRaw[0] as int) : (plRaw as int? ?? 0);
+        final channel = idToChannel[plId];
+        if (channel == null) continue;
+        final price = ((it['fixed_price'] as num?) ?? 0).toInt();
+        final prodRaw = it['product_id'];
+        final tmplRaw = it['product_tmpl_id'];
+        if (prodRaw is List && prodRaw.isNotEmpty) {
+          map[channel]![prodRaw[0] as int] = price;
+        } else if (tmplRaw is List && tmplRaw.isNotEmpty) {
+          map[channel]![tmplRaw[0] as int] = price;
+        }
+      }
+    } catch (e) {
+      debugPrint('[OdooClient] Note: error fetching pricelist items: $e');
+    }
+    return map;
+  }
+
   // Fetch Live POS Categories & Product Mapping
   Future<Map<int, String>> fetchCategoryMap() async {
     List<int> allowedCatIds = [];
@@ -932,6 +732,9 @@ class OdooClient {
   // Fetch Live Available POS Products with Real Category Assignments & Kit Detection
   Future<List<JuiceProduct>> fetchPosProducts() async {
     final catMap = await fetchCategoryMap();
+    final pricelists = await fetchPricelistMaps();
+    final grabMap = pricelists['grab'] ?? {};
+    final shopeeMap = pricelists['shopee'] ?? {};
 
     // Check phantom / kit BOMs so we do not show stock for kits
     final kitProductIds = <int>{};
@@ -1002,6 +805,7 @@ class OdooClient {
           'barcode',
           'default_code',
           'qty_available',
+          'uom_id',
           'product_tmpl_id',
           'write_date',
         ],
@@ -1019,6 +823,8 @@ class OdooClient {
       final barcode = row['barcode'] is String ? (row['barcode'] as String).trim() : null;
       final defaultCode = row['default_code'] is String ? (row['default_code'] as String).trim() : null;
       final qtyAvailable = (row['qty_available'] as num?)?.toDouble();
+      final uomRaw = row['uom_id'];
+      final uomName = uomRaw is List && uomRaw.length > 1 ? uomRaw[1].toString() : null;
       final writeDate = row['write_date'] is String ? (row['write_date'] as String).trim() : null;
 
       final tmplId = (row['product_tmpl_id'] is List && (row['product_tmpl_id'] as List).isNotEmpty)
@@ -1026,6 +832,9 @@ class OdooClient {
           : null;
       final isKit = kitProductIds.contains(id) || (tmplId != null && kitTmplIds.contains(tmplId));
       final hasImage = tmplId != null && tmplIdsWithImage.contains(tmplId);
+
+      final grabPrice = grabMap[id] ?? (tmplId != null ? grabMap[tmplId] : null);
+      final shopeePrice = shopeeMap[id] ?? (tmplId != null ? shopeeMap[tmplId] : null);
 
       String? category;
       for (final cid in categIds) {
@@ -1037,6 +846,14 @@ class OdooClient {
 
       category ??= (catMap.isNotEmpty ? catMap.values.first : 'General');
 
+      final lowerCat = category.toLowerCase();
+      final requiresModifier = profile.isFnb &&
+          (lowerCat.contains('juice') ||
+              lowerCat.contains('drink') ||
+              lowerCat.contains('smoothie') ||
+              lowerCat.contains('coffee') ||
+              lowerCat.contains('tea'));
+
       products.add(JuiceProduct(
         id: id,
         name: name,
@@ -1044,11 +861,14 @@ class OdooClient {
         category: category,
         barcode: barcode,
         defaultCode: defaultCode,
+        uomName: uomName,
         qtyAvailable: qtyAvailable,
         isKit: isKit,
-        icon: Icons.shopping_basket_outlined,
-        themeColor: const Color(0xFF1E88E5),
-        requiresModifier: false,
+        icon: profile.isFnb ? Icons.local_cafe_outlined : Icons.shopping_basket_outlined,
+        themeColor: profile.isFnb ? const Color(0xFFFB8C00) : const Color(0xFF1E88E5),
+        requiresModifier: requiresModifier,
+        grabPrice: grabPrice,
+        shopeePrice: shopeePrice,
         writeDate: writeDate,
         productTmplId: tmplId,
         hasImage: hasImage,

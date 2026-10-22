@@ -3,6 +3,7 @@ import 'modifier.dart';
 
 enum OrderChannelType {
   counter,
+  retail,
   dineIn,
   takeAway,
   grabFood,
@@ -11,7 +12,7 @@ enum OrderChannelType {
 
 class OrderChannel {
   final OrderChannelType type;
-  final String? deliveryPin;
+  final String? deliveryPin; // Up to 10-char ID for GrabFood / ShopeeFood
 
   const OrderChannel({
     required this.type,
@@ -21,10 +22,12 @@ class OrderChannel {
   String get displayName {
     switch (type) {
       case OrderChannelType.counter:
-      case OrderChannelType.dineIn:
+      case OrderChannelType.retail:
         return '🏪 Kasir Toko';
+      case OrderChannelType.dineIn:
+        return '🍽️ Dine In';
       case OrderChannelType.takeAway:
-        return '📦 Take Away';
+        return '🥡 Take Away';
       case OrderChannelType.grabFood:
         return '🟢 GrabFood #${deliveryPin ?? "----"}';
       case OrderChannelType.shopeeFood:
@@ -35,8 +38,10 @@ class OrderChannel {
   String get cleanDisplayName {
     switch (type) {
       case OrderChannelType.counter:
-      case OrderChannelType.dineIn:
+      case OrderChannelType.retail:
         return 'Kasir Toko';
+      case OrderChannelType.dineIn:
+        return 'Dine In';
       case OrderChannelType.takeAway:
         return 'Take Away';
       case OrderChannelType.grabFood:
@@ -66,6 +71,8 @@ class CartItem {
     this.customUnitPrice,
   });
 
+  int get baseUnitPrice => customUnitPrice ?? product.price;
+
   int get unitPrice {
     final base = customUnitPrice ?? (product.price + modifiers.extraPriceTotal);
     if (discountPercent != null && discountPercent! > 0) {
@@ -82,19 +89,20 @@ class CartItem {
     int? quantity,
     String? note,
     bool clearNote = false,
+    JuiceProduct? product,
     double? discountPercent,
     bool clearDiscount = false,
     int? customUnitPrice,
+    bool resetCustomPrice = false,
   }) {
     return CartItem(
       lineId: lineId,
-      product: product,
+      product: product ?? this.product,
       modifiers: modifiers,
       quantity: quantity ?? this.quantity,
       note: clearNote ? null : (note ?? this.note),
       discountPercent: clearDiscount ? null : (discountPercent ?? this.discountPercent),
-      customUnitPrice: customUnitPrice ?? this.customUnitPrice,
+      customUnitPrice: resetCustomPrice ? null : (customUnitPrice ?? this.customUnitPrice),
     );
   }
 }
-

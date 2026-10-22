@@ -1,0 +1,39 @@
+{
+  "use_odoo_original_format": false,
+  "sync_header_footer_from_odoo": false,
+  "customer_receipt": {
+    "store_name": "MAIN STORE POS",
+    "subtitle": "Point of Sale Receipt",
+    "footer": "Thank you for your business!",
+    "fnb_store_name": "CAFE & RESTAURANT POS",
+    "fnb_subtitle": "Point of Sale Receipt",
+    "fnb_footer": "Thank you for your business!",
+    "show_subtitle": true,
+    "show_cashier": true,
+    "show_customer": true,
+    "show_loyalty_points": true,
+    "show_footer": true
+  },
+  "cash_move": {
+    "header_title": "MAIN STORE POS",
+    "subtitle": "",
+    "show_voucher_banner": false,
+    "show_signature": false,
+    "footer_note": ""
+  },
+  "session_close": {
+    "header_title": "MAIN STORE POS",
+    "report_title": "CLOSING REPORT",
+    "subtitle": "",
+    "header_divider_char": "=",
+    "show_cash_moves_detail": true,
+    "show_non_cash_breakdown": true,
+    "show_signature": false,
+    "footer_note": ""
+  },
+  "kitchen": {
+    "header_title": "*** KITCHEN / BARISTA ORDER ***",
+    "show_modifiers": true,
+    "show_notes": true
+  }
+}

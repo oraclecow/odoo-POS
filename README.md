@@ -181,3 +181,9 @@ This application was created by a retail business owner pairing with **Google An
 * **Code Contributions Welcomed:** While the app runs daily in live production with zero crashes and passes standard Dart analysis, performance profiling, architectural refactoring, and code cleanup from seasoned Flutter/Dart developers are warmly welcomed!
 * If you see areas where state management, widget trees, or networking can be optimized or tightened, please feel free to open an issue or submit a pull request!
 
+
+## Modes & Receipts
+
+- **Business modes:** one codebase, two modes — `retail` (stock badges, kits) and `fnb` (modifiers, order channels, kitchen slip). Switch in *Server Setup → Business Mode*, or per profile via `web/pos_config.json`.
+- **Modular receipts:** all receipt layouts live in `lib/modules/pos_receipt/`. Edit text/toggles in `web/receipt_config.json` (no recompile), or set `"use_odoo_original_format": true` to print the standard Odoo receipt layout.
+- **Session open/close UI:** `lib/modules/pos_session/`.

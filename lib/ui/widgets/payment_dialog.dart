@@ -274,7 +274,7 @@ class _PaymentDialogState extends State<PaymentDialog> {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Header with Pick A Juice Brand
+                // Header with store brand
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [

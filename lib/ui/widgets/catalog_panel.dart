@@ -5,6 +5,7 @@ import '../../logic/pos_controller.dart';
 import '../core/app_colors.dart';
 import 'scrollable_category_bar.dart';
 import 'compact_juice_tile.dart';
+import 'juice_modifier_dialog.dart';
 import 'cart_item_quantity_dialog.dart';
 
 class CatalogPanel extends ConsumerStatefulWidget {
@@ -222,15 +223,32 @@ class _CatalogPanelState extends ConsumerState<CatalogPanel> {
                         product: product,
                         showImage: controller.showProductImages,
                         imageBaseUrl: controller.imageBaseUrl,
+                        channelType: controller.channel.type,
+                        showStockBadge: controller.guardrails.showStockBadges,
                         onTap: () {
-                          controller.addProductDirectly(product);
+                          if (controller.guardrails.enableFnbModifiers && product.requiresModifier) {
+                            final repo = ref.read(juicePosRepositoryProvider);
+                            showDialog(
+                              context: context,
+                              builder: (ctx) => JuiceModifierDialog(
+                                product: product,
+                                availableAddOns: repo.getAddOns(),
+                                channelType: controller.channel.type,
+                                onConfirm: (modifiers) {
+                                  controller.addJuiceItem(product, modifiers);
+                                },
+                              ),
+                            );
+                          } else {
+                            controller.addProductDirectly(product);
+                          }
                         },
                         onLongPress: () async {
                           final qty = await CartItemQuantityDialog.show(
                             context,
                             productName: product.name,
                             initialQuantity: 1,
-                            unitPrice: product.price,
+                            unitPrice: product.getPriceForChannel(controller.channel.type),
                             sku: product.defaultCode ?? product.barcode,
                           );
                           if (qty != null && qty > 0) {

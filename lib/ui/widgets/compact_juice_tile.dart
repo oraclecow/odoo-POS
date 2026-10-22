@@ -9,6 +9,8 @@ class CompactJuiceTile extends StatelessWidget {
   final VoidCallback? onLongPress;
   final bool showImage;
   final String imageBaseUrl;
+  final dynamic channelType;
+  final bool showStockBadge;
 
   const CompactJuiceTile({
     super.key,
@@ -17,6 +19,8 @@ class CompactJuiceTile extends StatelessWidget {
     this.onLongPress,
     this.showImage = true,
     this.imageBaseUrl = '',
+    this.channelType,
+    this.showStockBadge = true,
   });
 
   @override
@@ -145,6 +149,7 @@ class CompactJuiceTile extends StatelessWidget {
   }
 
   Widget _buildPricePill(NumberFormat currency) {
+    final effectivePrice = channelType != null ? product.getPriceForChannel(channelType) : product.price;
     return Container(
       alignment: Alignment.center,
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3.5),
@@ -154,7 +159,7 @@ class CompactJuiceTile extends StatelessWidget {
         border: Border.all(color: AppColors.brandOrange, width: 1.2),
       ),
       child: Text(
-        currency.format(product.price),
+        currency.format(effectivePrice),
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
         style: const TextStyle(
@@ -264,8 +269,8 @@ class CompactJuiceTile extends StatelessWidget {
   }
 
   Widget _buildStockBadge(JuiceProduct product) {
-    // Rule: BOM kit products should not show stock
-    if (product.isKit) {
+    // Rule: BOM kit products or F&B guardrail should not show stock
+    if (!showStockBadge || product.isKit) {
       return const SizedBox.shrink();
     }
 

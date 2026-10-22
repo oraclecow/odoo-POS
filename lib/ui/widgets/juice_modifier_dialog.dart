@@ -2,17 +2,20 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../../data/models/juice_product.dart';
 import '../../data/models/modifier.dart';
+import '../../data/models/order.dart';
 import '../core/app_colors.dart';
 
 class JuiceModifierDialog extends StatefulWidget {
   final JuiceProduct product;
   final List<AddOnOption> availableAddOns;
+  final OrderChannelType channelType;
   final Function(SelectedModifiers modifiers) onConfirm;
 
   const JuiceModifierDialog({
     super.key,
     required this.product,
     required this.availableAddOns,
+    this.channelType = OrderChannelType.retail,
     required this.onConfirm,
   });
 
@@ -32,20 +35,22 @@ class _JuiceModifierDialogState extends State<JuiceModifierDialog> {
   final _iceOptions = const ['Normal', 'Less Ice', 'No Ice', 'Extra Ice'];
   final _skmOptions = const ['Normal', 'Less SKM', 'No SKM', 'Extra SKM'];
 
+  int get _basePrice => widget.product.getPriceForChannel(widget.channelType);
+
   int get _calculatedTotal {
     final addOnTotal = _selectedAddOns.fold(0, (sum, item) => sum + item.extraPrice);
-    return widget.product.price + addOnTotal;
+    return _basePrice + addOnTotal;
   }
 
   @override
   Widget build(BuildContext context) {
     return Dialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      insetPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+      insetPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
       child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 520, maxHeight: 600),
+        constraints: const BoxConstraints(maxWidth: 760, maxHeight: 540),
         child: Padding(
-          padding: const EdgeInsets.all(20.0),
+          padding: const EdgeInsets.symmetric(horizontal: 22.0, vertical: 18.0),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -55,13 +60,22 @@ class _JuiceModifierDialogState extends State<JuiceModifierDialog> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Expanded(
-                    child: Text(
-                      '${widget.product.name.toUpperCase()} | ${_currency.format(widget.product.price)}',
-                      style: const TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.textPrimary,
-                      ),
+                    child: Row(
+                      children: [
+                        const Icon(Icons.tune_rounded, color: AppColors.accentPurple, size: 22),
+                        const SizedBox(width: 8),
+                        Flexible(
+                          child: Text(
+                            '${widget.product.name.toUpperCase()} • ${_currency.format(_basePrice)}',
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              fontSize: 17,
+                              fontWeight: FontWeight.bold,
+                              color: AppColors.textPrimary,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                   IconButton(
@@ -72,84 +86,196 @@ class _JuiceModifierDialogState extends State<JuiceModifierDialog> {
                   ),
                 ],
               ),
-              const Divider(height: 20, color: AppColors.divider),
+              const Divider(height: 18, color: AppColors.divider),
 
-              // Scrollable Options Content
-              Flexible(
-                child: SingleChildScrollView(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      _buildSectionTitle('GULA'),
-                      _buildPillSelector(
-                        options: _sugarOptions,
-                        selected: _selectedSugar,
-                        onSelected: (val) => setState(() => _selectedSugar = val),
-                      ),
-                      const SizedBox(height: 12),
-
-                      _buildSectionTitle('ES'),
-                      _buildPillSelector(
-                        options: _iceOptions,
-                        selected: _selectedIce,
-                        onSelected: (val) => setState(() => _selectedIce = val),
-                      ),
-                      const SizedBox(height: 12),
-
-                      _buildSectionTitle('SKM'),
-                      _buildPillSelector(
-                        options: _skmOptions,
-                        selected: _selectedSkm,
-                        onSelected: (val) => setState(() => _selectedSkm = val),
-                      ),
-                      const SizedBox(height: 12),
-
-                      _buildSectionTitle('ADD-ON'),
-                      Wrap(
-                        spacing: 8,
-                        runSpacing: 8,
-                        children: widget.availableAddOns.map((addon) {
-                          final isSelected = _selectedAddOns.contains(addon);
-                          return FilterChip(
-                            label: Text(
-                              '${addon.name} (+${_currency.format(addon.extraPrice)})',
-                              style: TextStyle(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w600,
-                                color: isSelected ? Colors.white : AppColors.textPrimary,
-                              ),
+              // Side-by-Side 2-Column Options Content for Wide Tablets
+              Expanded(
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // LEFT COLUMN: GULA, ES, SKM
+                    Expanded(
+                      flex: 4,
+                      child: SingleChildScrollView(
+                        physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            _buildSectionTitle('GULA'),
+                            _buildPillSelector(
+                              options: _sugarOptions,
+                              selected: _selectedSugar,
+                              onSelected: (val) => setState(() => _selectedSugar = val),
                             ),
-                            selected: isSelected,
-                            selectedColor: AppColors.accentPurple,
-                            backgroundColor: Colors.grey.shade100,
-                            checkmarkColor: Colors.white,
-                            side: BorderSide(
-                              color: isSelected ? Colors.transparent : Colors.grey.shade300,
+                            const SizedBox(height: 12),
+
+                            _buildSectionTitle('ES'),
+                            _buildPillSelector(
+                              options: _iceOptions,
+                              selected: _selectedIce,
+                              onSelected: (val) => setState(() => _selectedIce = val),
                             ),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
+                            const SizedBox(height: 12),
+
+                            _buildSectionTitle('SKM'),
+                            _buildPillSelector(
+                              options: _skmOptions,
+                              selected: _selectedSkm,
+                              onSelected: (val) => setState(() => _selectedSkm = val),
                             ),
-                            padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 0),
-                            onSelected: (selected) {
-                              setState(() {
-                                if (selected) {
-                                  _selectedAddOns.add(addon);
-                                } else {
-                                  _selectedAddOns.remove(addon);
-                                }
-                              });
-                            },
-                          );
-                        }).toList(),
+                          ],
+                        ),
                       ),
-                    ],
-                  ),
+                    ),
+
+                    const SizedBox(width: 16),
+                    const VerticalDivider(width: 1, thickness: 1, color: AppColors.divider),
+                    const SizedBox(width: 16),
+
+                    // RIGHT COLUMN: ADD-ON / TOPPING (ALWAYS VISIBLE SIDE-BY-SIDE)
+                    Expanded(
+                      flex: 6,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              _buildSectionTitle('ADD-ON / TOPPING'),
+                              if (_selectedAddOns.isNotEmpty)
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                                  decoration: BoxDecoration(
+                                    color: AppColors.accentPurple.withOpacity(0.12),
+                                    borderRadius: BorderRadius.circular(10),
+                                    border: Border.all(color: AppColors.accentPurple, width: 0.8),
+                                  ),
+                                  child: Text(
+                                    '${_selectedAddOns.length} dipilih',
+                                    style: const TextStyle(
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.bold,
+                                      color: AppColors.accentPurple,
+                                    ),
+                                  ),
+                                ),
+                            ],
+                          ),
+                          const SizedBox(height: 4),
+                          Expanded(
+                            child: widget.availableAddOns.isEmpty
+                                ? Center(
+                                    child: Text(
+                                      'Tidak ada add-on tersedia',
+                                      style: TextStyle(color: Colors.grey.shade500, fontSize: 13),
+                                    ),
+                                  )
+                                : Scrollbar(
+                                    thumbVisibility: true,
+                                    child: Padding(
+                                      padding: const EdgeInsets.only(right: 6.0),
+                                      child: GridView.builder(
+                                        physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
+                                        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                                          crossAxisCount: 2,
+                                          crossAxisSpacing: 8,
+                                          mainAxisSpacing: 8,
+                                          childAspectRatio: 2.3,
+                                        ),
+                                        itemCount: widget.availableAddOns.length,
+                                        itemBuilder: (context, index) {
+                                          final addon = widget.availableAddOns[index];
+                                          final isSelected = _selectedAddOns.contains(addon);
+                                          return InkWell(
+                                            onTap: () {
+                                              setState(() {
+                                                if (isSelected) {
+                                                  _selectedAddOns.remove(addon);
+                                                } else {
+                                                  _selectedAddOns.add(addon);
+                                                }
+                                              });
+                                            },
+                                            borderRadius: BorderRadius.circular(10),
+                                            child: AnimatedContainer(
+                                              duration: const Duration(milliseconds: 150),
+                                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                                              decoration: BoxDecoration(
+                                                color: isSelected
+                                                    ? AppColors.accentPurple.withOpacity(0.12)
+                                                    : Colors.grey.shade50,
+                                                borderRadius: BorderRadius.circular(10),
+                                                border: Border.all(
+                                                  color: isSelected
+                                                      ? AppColors.accentPurple
+                                                      : Colors.grey.shade300,
+                                                  width: isSelected ? 1.5 : 1.0,
+                                                ),
+                                              ),
+                                              child: Row(
+                                                children: [
+                                                  Icon(
+                                                    isSelected
+                                                        ? Icons.check_circle_rounded
+                                                        : Icons.radio_button_unchecked_rounded,
+                                                    size: 18,
+                                                    color: isSelected
+                                                        ? AppColors.accentPurple
+                                                        : Colors.grey.shade400,
+                                                  ),
+                                                  const SizedBox(width: 8),
+                                                  Expanded(
+                                                    child: Column(
+                                                      mainAxisAlignment: MainAxisAlignment.center,
+                                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                                      children: [
+                                                        Text(
+                                                          addon.name,
+                                                          maxLines: 1,
+                                                          overflow: TextOverflow.ellipsis,
+                                                          style: TextStyle(
+                                                            fontSize: 12,
+                                                            fontWeight: isSelected
+                                                                ? FontWeight.w700
+                                                                : FontWeight.w600,
+                                                            color: isSelected
+                                                                ? AppColors.accentPurple
+                                                                : AppColors.textPrimary,
+                                                          ),
+                                                        ),
+                                                        const SizedBox(height: 2),
+                                                        Text(
+                                                          '+${_currency.format(addon.extraPrice)}',
+                                                          style: TextStyle(
+                                                            fontSize: 11,
+                                                            fontWeight: FontWeight.bold,
+                                                            color: isSelected
+                                                                ? AppColors.accentPurple
+                                                                : AppColors.textSecondary,
+                                                          ),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          );
+                                        },
+                                      ),
+                                    ),
+                                  ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
               ),
 
-              const SizedBox(height: 16),
+              const SizedBox(height: 12),
               const Divider(height: 1, color: AppColors.divider),
-              const SizedBox(height: 14),
+              const SizedBox(height: 12),
 
               // Bottom Actions
               Row(
@@ -162,7 +288,7 @@ class _JuiceModifierDialogState extends State<JuiceModifierDialog> {
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                     ),
                     child: const Text(
-                      'Discard',
+                      'Batal',
                       style: TextStyle(color: AppColors.textSecondary, fontSize: 14, fontWeight: FontWeight.w600),
                     ),
                   ),
@@ -184,7 +310,7 @@ class _JuiceModifierDialogState extends State<JuiceModifierDialog> {
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                       ),
                       child: Text(
-                        'Add • ${_currency.format(_calculatedTotal)}',
+                        'Tambah ke Pesanan • ${_currency.format(_calculatedTotal)}',
                         style: const TextStyle(
                           fontSize: 15,
                           fontWeight: FontWeight.bold,

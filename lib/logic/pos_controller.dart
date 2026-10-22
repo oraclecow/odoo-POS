@@ -10,6 +10,7 @@ import '../data/models/floating_order.dart';
 import 'package:http/http.dart' as http;
 import '../data/repositories/juice_pos_repository.dart';
 import '../data/services/odoo_client.dart';
+import '../core/config/runtime_config_loader.dart';
 
 final odooClientProvider = Provider<OdooClient>((ref) => OdooClient());
 
@@ -101,8 +102,18 @@ class PosController extends ChangeNotifier {
     _imageBaseUrl = _repository.odooClient?.baseUrl ?? 'http://localhost:8069';
   }
 
+  PosRuntimeConfig _runtimeConfig = const PosRuntimeConfig();
+  PosRuntimeConfig get runtimeConfig => _runtimeConfig;
+
+  OdooCompanyProfile get activeProfile =>
+      _repository.odooClient?.profile ?? OdooCompanyProfile.defaultDemoProfile;
+
+  PosBusinessMode get businessMode => activeProfile.mode;
+  WorkerUiGuardrails get guardrails => activeProfile.guardrails;
+
   Future<void> _initAndSync() async {
     try {
+      _runtimeConfig = await PosRuntimeConfig.load();
       await loadProductImageSettings();
       await _repository.odooClient?.loadSavedSettings();
       await _checkLocalProxy();
@@ -327,9 +338,10 @@ class PosController extends ChangeNotifier {
       currentOrder.items[existingIdx].quantity += qty;
     } else {
       final lineId = '${product.id}_${DateTime.now().millisecondsSinceEpoch}';
+      final channelPrice = product.getPriceForChannel(currentOrder.channel.type);
       currentOrder.items.add(CartItem(
         lineId: lineId,
-        product: product,
+        product: product.copyWith(price: channelPrice),
         modifiers: const SelectedModifiers(),
         quantity: qty,
       ));
@@ -339,9 +351,10 @@ class PosController extends ChangeNotifier {
 
   void addJuiceItem(JuiceProduct product, SelectedModifiers modifiers, [int qty = 1]) {
     final lineId = '${product.id}_${DateTime.now().millisecondsSinceEpoch}';
+    final channelPrice = product.getPriceForChannel(currentOrder.channel.type);
     currentOrder.items.add(CartItem(
       lineId: lineId,
-      product: product,
+      product: product.copyWith(price: channelPrice),
       modifiers: modifiers,
       quantity: qty,
     ));
@@ -448,6 +461,20 @@ class PosController extends ChangeNotifier {
 
   void setOrderChannel(OrderChannelType type, [String? pin]) {
     currentOrder.channel = OrderChannel(type: type, deliveryPin: pin);
+    // Recalculate channel prices for items in cart if catalog has grab/shopee prices
+    for (int i = 0; i < currentOrder.items.length; i++) {
+      final item = currentOrder.items[i];
+      if (item.quantity > 0) {
+        final origProd = _allProducts.firstWhere(
+          (p) => p.id == item.product.id,
+          orElse: () => item.product,
+        );
+        final newChannelPrice = origProd.getPriceForChannel(type);
+        currentOrder.items[i] = item.copyWith(
+          product: item.product.copyWith(price: newChannelPrice),
+        );
+      }
+    }
     notifyListeners();
   }
 
