@@ -330,7 +330,7 @@ class OrderTicketPanel extends ConsumerWidget {
                     opacity: 0.12,
                     child: Image.asset(
                       controller.businessMode.isFnb ? 'assets/images/paj_logo.png' : 'assets/images/arawali_logo.png',
-                      width: 200,
+                      width: 220,
                       fit: BoxFit.contain,
                     ),
                   ),
@@ -843,7 +843,7 @@ class OrderTicketPanel extends ConsumerWidget {
                                     children: [
                                       Image.asset(
                                         isFnbMode ? 'assets/images/paj_logo.png' : 'assets/images/arawali_logo.png',
-                                        height: 38,
+                                        height: 42,
                                         fit: BoxFit.contain,
                                       ),
                                       const SizedBox(width: 10),

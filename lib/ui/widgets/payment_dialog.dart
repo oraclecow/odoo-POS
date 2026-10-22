@@ -282,7 +282,7 @@ class _PaymentDialogState extends State<PaymentDialog> {
                   children: [
                     Row(
                       children: [
-                        Image.asset('assets/images/arawali_logo.png', height: 32, fit: BoxFit.contain),
+                        Image.asset('assets/images/arawali_logo.png', height: 38, fit: BoxFit.contain),
                         const SizedBox(width: 10),
                         const Text(
                           'ARAWALI POS CHECKOUT',

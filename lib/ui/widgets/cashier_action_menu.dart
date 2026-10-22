@@ -36,7 +36,7 @@ class CashierActionMenu {
                 // Header: Logo, Title, and Close Button
                 Row(
                   children: [
-                    Image.asset('assets/images/arawali_logo.png', height: 28, fit: BoxFit.contain),
+                    Image.asset('assets/images/arawali_logo.png', height: 34, fit: BoxFit.contain),
                     const SizedBox(width: 10),
                     const Expanded(
                       child: Column(
