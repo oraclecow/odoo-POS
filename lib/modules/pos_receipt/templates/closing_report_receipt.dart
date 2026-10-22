@@ -19,78 +19,79 @@ class ClosingReportReceiptTemplate {
     String? storeNameOverride,
   }) {
     final doc = EscPosBuilder(cols: cols);
-    final headerTitle = (storeNameOverride != null && storeNameOverride.isNotEmpty)
-        ? storeNameOverride
-        : config.headerTitle;
+    final effectiveHeader = (storeNameOverride != null && storeNameOverride.trim().isNotEmpty)
+        ? storeNameOverride.trim()
+        : config.header;
 
     // 1. Header Block
-    doc.title(headerTitle);
-    if (config.reportTitle.isNotEmpty) {
-      doc.centerLine(config.reportTitle, bold: true);
+    doc.title(effectiveHeader);
+    if (config.showAddress && config.address.isNotEmpty) {
+      doc.centerMultiline(config.address, bold: true);
+    }
+    if (config.title.isNotEmpty) {
+      doc.centerLine(config.title, bold: true);
     }
     if (config.subtitle.isNotEmpty) {
-      doc.centerMultiline(config.subtitle);
+      doc.centerLine(config.subtitle, bold: true);
     }
-    doc.divider(config.headerDividerChar.isNotEmpty ? config.headerDividerChar : '=');
+    doc.doubleDivider();
 
     // 2. Session Metadata Block
-    final timeStr = DateFormat('yyyy-MM-dd HH:mm').format(DateTime.now());
-    doc.leftLine("Sesi    : $sessionName");
-    doc.leftLine("Waktu   : $timeStr");
-    doc.leftLine("Kasir   : ${cashierName ?? 'Staff'}");
+    final timeStr = DateFormat('dd/MM/yyyy HH:mm:ss').format(DateTime.now());
+    doc.row("Waktu Cetak", timeStr);
+    doc.row("Sesi Odoo", sessionName);
+    if (cashierName != null && cashierName.isNotEmpty) {
+      doc.row("Kasir", cashierName);
+    }
     doc.divider();
 
     // 3. Sales Summary Block
-    doc.row("Total Transaksi", "${closingData.orderCount} Order");
-    doc.row("Total Penjualan", _currency.format(closingData.totalSales), bold: true);
-    doc.divider();
-
-    // 4. Cash Drawer Reconciliation Block
-    doc.leftLine("REKONSILIASI KAS LACI (TUNAI)", bold: true);
-    doc.row("Modal Awal", _currency.format(closingData.openingCash));
-    doc.row("+ Penjualan Tunai", _currency.format(closingData.cashPayments));
-    doc.row("+/- Kas Masuk/Keluar", _currency.format(closingData.cashMovesTotal));
-
-    // Detailed Cash In / Out lines if present and enabled
-    if (config.showCashMovesDetail && closingData.cashMoves.isNotEmpty) {
-      for (final m in closingData.cashMoves) {
-        final name = (m['name']?.toString() ?? 'Move').trim();
-        final amt = (m['amount'] as num?)?.toDouble() ?? 0.0;
-        final shortName = name.length > 18 ? '${name.substring(0, 18)}..' : name;
-        doc.row("  * $shortName", _currency.format(amt));
-      }
-    }
-
-    doc.divider();
-    doc.row("Kas Seharusnya", _currency.format(closingData.expectedCash), bold: true);
-    doc.row("Fisik Kas Dihitung", _currency.format(countedCash), bold: true);
-
-    final diffSign = cashDifference > 0 ? '+' : '';
-    doc.row("Selisih Kas", "$diffSign${_currency.format(cashDifference)}", bold: true);
-
-    // 5. Non-Cash Payment Breakdown Block
-    if (config.showNonCashBreakdown && closingData.nonCashMethods.isNotEmpty) {
+    if (config.showSalesSummary) {
+      doc.leftLine("RINGKASAN PENJUALAN", bold: true);
+      doc.row("Total Nota", "${closingData.orderCount} Transaksi");
+      doc.row("Total Penjualan", _currency.format(closingData.totalSales));
       doc.divider();
-      doc.leftLine("PEMBAYARAN NON-TUNAI", bold: true);
-      for (final pm in closingData.nonCashMethods) {
-        doc.row(pm.name, _currency.format(pm.amount));
-      }
     }
 
-    doc.divider(config.headerDividerChar.isNotEmpty ? config.headerDividerChar : '=');
+    // 4. Cash Drawer Control Block
+    if (config.showCashControl) {
+      doc.leftLine("KONTROL KAS LACI (CASH)", bold: true);
+      doc.row("Saldo Awal", _currency.format(closingData.openingCash));
+      doc.row("(+) Kas Masuk", _currency.format(closingData.cashPayments));
+      if (closingData.cashMovesTotal != 0) {
+        doc.row("(+/-) Mutasi Kas", _currency.format(closingData.cashMovesTotal));
+      }
+      doc.row("(=) Kas Seharusnya", _currency.format(closingData.expectedCash));
+      doc.row("( ) Kas Fisik Dihitung", _currency.format(countedCash), bold: true);
+      final diffLabel = cashDifference == 0
+          ? "PAS"
+          : (cashDifference > 0 ? "LEBIH" : "KURANG");
+      doc.row("Selisih Kas", "${_currency.format(cashDifference)} ($diffLabel)", bold: true);
+      doc.divider();
+    }
 
-    // 6. Optional Signature / Footer Block
+    // 5. Non-Cash / QRIS Block
+    if (config.showNonCashQris && closingData.nonCashMethods.isNotEmpty) {
+      doc.leftLine("NON-TUNAI / BANK / QRIS", bold: true);
+      for (final m in closingData.nonCashMethods) {
+        doc.row(m.name, "${_currency.format(m.amount)} (${m.number})");
+      }
+      doc.doubleDivider();
+    } else {
+      doc.doubleDivider();
+    }
+
+    // 6. Optional Signature / Footer Block (disabled by default per config)
     if (config.showSignature) {
       doc.blankLine();
-      doc.centerLine("Kasir                 Supervisor");
+      doc.leftLine("Kasir                 Supervisor");
       doc.blankLine();
-      doc.blankLine();
-      doc.centerLine("(___________)      (___________)");
+      doc.leftLine("(               )     (               )");
     }
-    if (config.footerNote.isNotEmpty) {
-      doc.centerMultiline(config.footerNote);
+    if (config.footer.isNotEmpty) {
+      doc.centerMultiline(config.footer);
     }
 
-    return doc.build(autoCutter: autoCutter, is80mm: is80mm, trailingBlankLine: true);
+    return doc.build(autoCutter: autoCutter, is80mm: is80mm);
   }
 }

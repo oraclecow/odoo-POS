@@ -280,7 +280,7 @@ class _AppUpdateDialogState extends State<AppUpdateDialog> {
                           AppUpdateService.downloadApkWeb();
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(
-                              content: Text('Downloading Open Odoo POS Android APK installer...'),
+                              content: Text('Downloading PAJ POS Android APK installer...'),
                               backgroundColor: Colors.teal,
                             ),
                           );

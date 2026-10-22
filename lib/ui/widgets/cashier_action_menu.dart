@@ -36,7 +36,7 @@ class CashierActionMenu {
                 // Header: Logo, Title, and Close Button
                 Row(
                   children: [
-                    Image.asset('assets/images/store_logo.png', height: 28, fit: BoxFit.contain),
+                    Image.asset('assets/images/arawali_logo.png', height: 28, fit: BoxFit.contain),
                     const SizedBox(width: 10),
                     const Expanded(
                       child: Column(
@@ -51,7 +51,7 @@ class CashierActionMenu {
                             ),
                           ),
                           Text(
-                            'OPEN ODOO POS',
+                            'ARAWALI STORE POS',
                             style: TextStyle(
                               fontSize: 11,
                               fontWeight: FontWeight.bold,
@@ -76,7 +76,7 @@ class CashierActionMenu {
                   icon: Icons.badge_rounded,
                   iconColor: Colors.teal,
                   title: 'Cashier (Ganti Kasir)',
-                  subtitle: 'Active: ${controller.activeCashier?.name ?? "Cashier"} (Tap to switch)',
+                  subtitle: 'Active: ${controller.activeCashier?.name ?? "Ainun"} (Tap to switch)',
                   trailing: Container(
                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                     decoration: BoxDecoration(
@@ -205,7 +205,7 @@ class CashierActionMenu {
                       : 'Hanya teks nama produk (Mode Teks Ringkas)',
                   trailing: Switch(
                     value: controller.showProductImages,
-                    activeThumbColor: AppColors.brandOrange,
+                    activeThumbColor: AppColors.arawaliOrange,
                     onChanged: (val) {
                       controller.toggleShowProductImages(val);
                       Navigator.pop(ctx);
@@ -260,7 +260,7 @@ class CashierActionMenu {
                             AppUpdateService.downloadApkWeb();
                             ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(
-                                content: Text('Downloading Open Odoo POS Android APK installer...'),
+                                content: Text('Downloading PAJ POS Android APK installer...'),
                                 backgroundColor: Colors.teal,
                               ),
                             );
@@ -273,7 +273,7 @@ class CashierActionMenu {
                                 webVersion: AppUpdateService.currentVersionName,
                                 apkUrl: '/app-release.apk',
                                 releaseDate: '2026-10-12',
-                                releaseNotes: ['Official Open Odoo POS Android APK Installer'],
+                                releaseNotes: ['Official PAJ POS Android APK Installer'],
                               ),
                               serverBaseUrl: odooClient.baseUrl,
                             );
@@ -459,66 +459,109 @@ class CashierActionMenu {
                   ],
                 ),
                 const SizedBox(height: 18),
-                Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: AppColors.border),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          const Icon(Icons.storefront_rounded, color: AppColors.primaryRed, size: 20),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: Text(
-                              odooClient.profile.displayName,
-                              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 6),
-                      Text(
-                        'POS Config #${odooClient.profile.posConfigId} • Company ID #${odooClient.profile.companyId}',
-                        style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
-                      ),
-                      Text(
-                        'Database: ${odooClient.database} • Server: ${odooClient.baseUrl}',
-                        style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
-                      ),
-                      const SizedBox(height: 12),
-                      SizedBox(
-                        width: double.infinity,
-                        child: ElevatedButton.icon(
-                          icon: const Icon(Icons.settings_suggest_rounded, size: 16),
-                          label: const Text('Configure Odoo Server & Register'),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.deepSlate,
-                            foregroundColor: Colors.white,
-                            padding: const EdgeInsets.symmetric(vertical: 10),
-                          ),
-                          onPressed: () {
-                            Navigator.pop(ctx);
-                            showDialog(
-                              context: context,
-                              builder: (_) => OdooConnectionDialog(
-                                odooClient: odooClient,
-                                controller: controller,
-                              ),
-                            );
-                          },
+                _buildRegisterOption(
+                  ctx: ctx,
+                  context: context,
+                  title: '🏪 Arawali Kasir 1',
+                  subtitle: 'Register Utama (Config #2 - arawali)',
+                  isSelected: odooClient.profile.posConfigId == 2,
+                  onSelect: () async {
+                    Navigator.pop(ctx);
+                    final target = OdooCompanyProfile.availableProfiles.firstWhere(
+                      (p) => p.posConfigId == 2,
+                      orElse: () => OdooCompanyProfile.availableProfiles.first,
+                    );
+                    await controller.switchRegisterProfile(target);
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text('✅ Berpindah ke ${target.displayName}. Sesi: ${odooClient.activeSessionName ?? "Belum Buka Sesi"}'),
+                          backgroundColor: Colors.green,
                         ),
-                      ),
-                    ],
-                  ),
+                      );
+                    }
+                  },
+                ),
+                const SizedBox(height: 10),
+                _buildRegisterOption(
+                  ctx: ctx,
+                  context: context,
+                  title: '🏪 Arawali Kasir 2',
+                  subtitle: 'Register Sekunder (Config #1 - Kasir2)',
+                  isSelected: odooClient.profile.posConfigId == 1,
+                  onSelect: () async {
+                    Navigator.pop(ctx);
+                    final target = OdooCompanyProfile.availableProfiles.firstWhere(
+                      (p) => p.posConfigId == 1,
+                      orElse: () => OdooCompanyProfile.availableProfiles[1],
+                    );
+                    await controller.switchRegisterProfile(target);
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text('✅ Berpindah ke ${target.displayName}. Sesi: ${odooClient.activeSessionName ?? "Belum Buka Sesi"}'),
+                          backgroundColor: Colors.green,
+                        ),
+                      );
+                    }
+                  },
                 ),
               ],
             ),
           ),
+        ),
+      ),
+    );
+  }
+
+  static Widget _buildRegisterOption({
+    required BuildContext ctx,
+    required BuildContext context,
+    required String title,
+    required String subtitle,
+    required bool isSelected,
+    required VoidCallback onSelect,
+  }) {
+    return InkWell(
+      onTap: onSelect,
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+        decoration: BoxDecoration(
+          color: isSelected ? Colors.purple.shade50 : AppColors.cardSurface,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: isSelected ? Colors.purple.shade700 : AppColors.border,
+            width: isSelected ? 2 : 1,
+          ),
+        ),
+        child: Row(
+          children: [
+            Icon(
+              isSelected ? Icons.check_circle_rounded : Icons.radio_button_unchecked_rounded,
+              color: isSelected ? Colors.purple.shade700 : Colors.grey,
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                      color: isSelected ? Colors.purple.shade900 : AppColors.textPrimary,
+                    ),
+                  ),
+                  Text(
+                    subtitle,
+                    style: const TextStyle(fontSize: 11.5, color: AppColors.textSecondary),
+                  ),
+                ],
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -577,8 +620,6 @@ class CashierActionMenu {
                     order: lastOrder,
                     lines: lines,
                     storeName: odooClient.profile.displayName.replaceAll(RegExp(r'\(.*?\)'), '').trim(),
-                    customHeader: odooClient.profile.receiptHeader,
-                    customFooter: odooClient.profile.receiptFooter,
                   );
                   if (context.mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(

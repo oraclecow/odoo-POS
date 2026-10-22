@@ -4,7 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 
 class ApkInstaller {
-  static const MethodChannel _channel = MethodChannel('org.openodoo.pos/updater');
+  static const MethodChannel _channel = MethodChannel('com.arawali.pos/updater');
 
   static Future<void> downloadAndInstall({
     required String downloadUrl,

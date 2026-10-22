@@ -85,7 +85,7 @@ class _PrinterConfigDialogState extends State<PrinterConfigDialog> {
         ? '58mm Series Printer'
         : _windowsPrinterController.text.trim();
     s.eposEndpoint = _eposUrlController.text.trim().isEmpty
-        ? 'http://192.168.1.100/cgi-bin/epos/service.cgi?devid=local_printer'
+        ? 'http://192.168.201.193/cgi-bin/epos/service.cgi?devid=local_printer'
         : _eposUrlController.text.trim();
     s.paperWidth = _paperWidth;
     s.autoCutter = _autoCutter;
@@ -112,7 +112,7 @@ class _PrinterConfigDialogState extends State<PrinterConfigDialog> {
         ? '58mm Series Printer'
         : _windowsPrinterController.text.trim();
     s.eposEndpoint = _eposUrlController.text.trim().isEmpty
-        ? 'http://192.168.1.100/cgi-bin/epos/service.cgi?devid=local_printer'
+        ? 'http://192.168.201.193/cgi-bin/epos/service.cgi?devid=local_printer'
         : _eposUrlController.text.trim();
     s.paperWidth = _paperWidth;
     s.autoCutter = _autoCutter;
@@ -353,7 +353,7 @@ class _PrinterConfigDialogState extends State<PrinterConfigDialog> {
                   controller: _eposUrlController,
                   decoration: InputDecoration(
                     labelText: 'COB ePOS Endpoint URL',
-                    hintText: 'http://192.168.1.100/cgi-bin/epos/service.cgi?devid=local_printer',
+                    hintText: 'http://192.168.201.193/cgi-bin/epos/service.cgi?devid=local_printer',
                     helperText: 'Sends print jobs across LAN to the 58mm printer on COB',
                     helperStyle: TextStyle(fontSize: 11, color: Colors.blue.shade800),
                     prefixIcon: const Icon(Icons.cloud_outlined),

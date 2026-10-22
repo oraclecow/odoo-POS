@@ -74,9 +74,11 @@ class PrinterService extends ChangeNotifier {
 
   Future<Map<String, dynamic>> testPrint() async {
     final doc = EscPosBuilder(cols: _maxColumns);
-    doc.title("OPEN ODOO POS");
-    doc.centerLine("Point of Sale System", bold: true);
-    doc.centerLine("THERMAL PRINTER TEST RECEIPT", bold: true);
+    doc.title(receiptConfig.customerReceipt.storeName);
+    if (receiptConfig.customerReceipt.subtitle.isNotEmpty) {
+      doc.centerMultiline(receiptConfig.customerReceipt.subtitle, bold: true);
+    }
+    doc.centerLine("ARAWALI POS TEST RECEIPT", bold: true);
     doc.divider();
 
     final timeStr = DateFormat('yyyy-MM-dd HH:mm:ss').format(DateTime.now());
@@ -110,10 +112,8 @@ class PrinterService extends ChangeNotifier {
     String? trackingNumber,
     Customer? customer,
     String? cashierName,
-    String storeName = 'STORE POS',
+    String storeName = 'ARAWALI',
     int companyId = 1,
-    String? customHeader,
-    String? customFooter,
   }) async {
     final doc = CustomerReceiptTemplate.buildCustomerReceipt(
       cols: _maxColumns,
@@ -136,8 +136,6 @@ class PrinterService extends ChangeNotifier {
       cashierName: cashierName,
       storeName: storeName,
       companyId: companyId,
-      customHeader: customHeader,
-      customFooter: customFooter,
     );
     return await _dispatchDocument(doc, label: 'Customer Receipt');
   }
@@ -145,10 +143,8 @@ class PrinterService extends ChangeNotifier {
   Future<Map<String, dynamic>> printHistoryReceipt({
     required OdooOrderRecord order,
     List<Map<String, dynamic>>? lines,
-    String storeName = 'STORE POS',
+    String storeName = 'ARAWALI',
     int companyId = 1,
-    String? customHeader,
-    String? customFooter,
   }) async {
     final doc = CustomerReceiptTemplate.buildHistoryReceipt(
       cols: _maxColumns,
@@ -159,8 +155,6 @@ class PrinterService extends ChangeNotifier {
       lines: lines,
       storeName: storeName,
       companyId: companyId,
-      customHeader: customHeader,
-      customFooter: customFooter,
     );
     return await _dispatchDocument(doc, label: 'Reprint #${order.name}');
   }
@@ -216,8 +210,7 @@ class PrinterService extends ChangeNotifier {
     required PosClosingControlData closingData,
     required double countedCash,
     required double cashDifference,
-    String storeName = 'STORE POS',
-    String? customHeader,
+    String storeName = 'ARAWALI',
   }) async {
     final doc = ClosingReportReceiptTemplate.build(
       cols: _maxColumns,

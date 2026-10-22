@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 import '../../data/services/odoo_client.dart';
 import '../../data/services/printer/printer_service.dart';
 import '../../data/models/juice_product.dart';
+import '../../data/models/floating_order.dart';
 import '../../logic/pos_controller.dart';
 import '../core/app_colors.dart';
 import 'admin_pin_dialog.dart';
@@ -294,8 +295,6 @@ class _OrderHistoryPanelState extends State<OrderHistoryPanel> {
                                                     order: order,
                                                     lines: lines,
                                                     storeName: widget.odooClient.profile.displayName.replaceAll(RegExp(r'\(.*?\)'), '').trim(),
-                                                    customHeader: widget.odooClient.profile.receiptHeader,
-                                                    customFooter: widget.odooClient.profile.receiptFooter,
                                                   );
                                                   if (context.mounted) {
                                                     ScaffoldMessenger.of(context).showSnackBar(

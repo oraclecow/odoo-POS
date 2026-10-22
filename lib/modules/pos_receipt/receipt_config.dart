@@ -72,12 +72,12 @@ class CustomerReceiptConfig {
   final bool showFooter;
 
   const CustomerReceiptConfig({
-    this.storeName = 'MAIN STORE POS',
-    this.subtitle = 'Point of Sale Receipt',
-    this.footer = 'Thank you for your business!',
-    this.fnbStoreName = 'CAFE & RESTAURANT POS',
-    this.fnbSubtitle = 'Point of Sale Receipt',
-    this.fnbFooter = 'Thank you for your business!',
+    this.storeName = 'ARAWALI',
+    this.subtitle = 'Bima Kota NTB 0811-3909-800',
+    this.footer = 'Penukaran MAX 1x24 Jam',
+    this.fnbStoreName = 'Pick A Juice',
+    this.fnbSubtitle = 'Jl. Kartini No. 10 - Kota Bima\nIG: @pickajuiceid | WA: 0878-4519-3760',
+    this.fnbFooter = 'Terima kasih atas kunjungan anda\nTunjukkan Resi untuk parkir gratis',
     this.showSubtitle = true,
     this.showCashier = true,
     this.showCustomer = true,
@@ -87,12 +87,14 @@ class CustomerReceiptConfig {
 
   factory CustomerReceiptConfig.fromJson(Map<String, dynamic> json) {
     return CustomerReceiptConfig(
-      storeName: json['store_name']?.toString() ?? 'MAIN STORE POS',
-      subtitle: json['subtitle']?.toString() ?? 'Point of Sale Receipt',
-      footer: json['footer']?.toString() ?? 'Thank you for your business!',
-      fnbStoreName: json['fnb_store_name']?.toString() ?? 'CAFE & RESTAURANT POS',
-      fnbSubtitle: json['fnb_subtitle']?.toString() ?? 'Point of Sale Receipt',
-      fnbFooter: json['fnb_footer']?.toString() ?? 'Thank you for your business!',
+      storeName: json['store_name'] as String? ?? 'ARAWALI',
+      subtitle: json['subtitle'] as String? ?? 'Bima Kota NTB 0811-3909-800',
+      footer: json['footer'] as String? ?? 'Penukaran MAX 1x24 Jam',
+      fnbStoreName: json['fnb_store_name'] as String? ?? 'Pick A Juice',
+      fnbSubtitle: json['fnb_subtitle'] as String? ??
+          'Jl. Kartini No. 10 - Kota Bima\nIG: @pickajuiceid | WA: 0878-4519-3760',
+      fnbFooter: json['fnb_footer'] as String? ??
+          'Terima kasih atas kunjungan anda\nTunjukkan Resi untuk parkir gratis',
       showSubtitle: json['show_subtitle'] as bool? ?? true,
       showCashier: json['show_cashier'] as bool? ?? true,
       showCustomer: json['show_customer'] as bool? ?? true,
@@ -117,123 +119,128 @@ class CustomerReceiptConfig {
 }
 
 class CashMoveReceiptConfig {
-  final String headerTitle;
-  final String subtitle;
   final bool showVoucherBanner;
+  final String header;
+  final bool showCashier;
+  final bool showReason;
   final bool showSignature;
-  final String footerNote;
+  final String footer;
 
   const CashMoveReceiptConfig({
-    this.headerTitle = 'MAIN STORE POS',
-    this.subtitle = '',
     this.showVoucherBanner = false,
+    this.header = 'ARAWALI - KOTA BIMA',
+    this.showCashier = true,
+    this.showReason = true,
     this.showSignature = false,
-    this.footerNote = '',
+    this.footer = '',
   });
 
   factory CashMoveReceiptConfig.fromJson(Map<String, dynamic> json) {
     return CashMoveReceiptConfig(
-      headerTitle: json['header_title']?.toString() ?? 'MAIN STORE POS',
-      subtitle: json['subtitle']?.toString() ?? '',
       showVoucherBanner: json['show_voucher_banner'] as bool? ?? false,
+      header: json['header'] as String? ?? 'ARAWALI - KOTA BIMA',
+      showCashier: json['show_cashier'] as bool? ?? true,
+      showReason: json['show_reason'] as bool? ?? true,
       showSignature: json['show_signature'] as bool? ?? false,
-      footerNote: json['footer_note']?.toString() ?? '',
+      footer: json['footer'] as String? ?? '',
     );
   }
 
   Map<String, dynamic> toJson() => {
-        'header_title': headerTitle,
-        'subtitle': subtitle,
         'show_voucher_banner': showVoucherBanner,
+        'header': header,
+        'show_cashier': showCashier,
+        'show_reason': showReason,
         'show_signature': showSignature,
-        'footer_note': footerNote,
+        'footer': footer,
       };
 }
 
 class SessionCloseReceiptConfig {
-  final String headerTitle;
-  final String reportTitle;
+  final String header;
+  final String title;
   final String subtitle;
-  final String headerDividerChar;
-  final bool showCashMovesDetail;
-  final bool showNonCashBreakdown;
+  final bool showAddress;
+  final String address;
+  final bool showSalesSummary;
+  final bool showCashControl;
+  final bool showNonCashQris;
   final bool showSignature;
-  final String footerNote;
+  final String footer;
 
   const SessionCloseReceiptConfig({
-    this.headerTitle = 'MAIN STORE POS',
-    this.reportTitle = 'LAPORAN PENUTUPAN KASIR',
+    this.header = 'ARAWALI',
+    this.title = 'LAPORAN PENUTUPAN KASIR',
     this.subtitle = '',
-    this.headerDividerChar = '=',
-    this.showCashMovesDetail = true,
-    this.showNonCashBreakdown = true,
+    this.showAddress = false,
+    this.address = '',
+    this.showSalesSummary = true,
+    this.showCashControl = true,
+    this.showNonCashQris = true,
     this.showSignature = false,
-    this.footerNote = '',
+    this.footer = '',
   });
 
   factory SessionCloseReceiptConfig.fromJson(Map<String, dynamic> json) {
     return SessionCloseReceiptConfig(
-      headerTitle: json['header_title']?.toString() ?? 'MAIN STORE POS',
-      reportTitle: json['report_title']?.toString() ?? 'LAPORAN PENUTUPAN KASIR',
-      subtitle: json['subtitle']?.toString() ?? '',
-      headerDividerChar: json['header_divider_char']?.toString() ?? '=',
-      showCashMovesDetail: json['show_cash_moves_detail'] as bool? ?? true,
-      showNonCashBreakdown: json['show_non_cash_breakdown'] as bool? ?? true,
+      header: json['header'] as String? ?? 'ARAWALI',
+      title: json['title'] as String? ?? 'LAPORAN PENUTUPAN KASIR',
+      subtitle: json['subtitle'] as String? ?? '',
+      showAddress: json['show_address'] as bool? ?? false,
+      address: json['address'] as String? ?? '',
+      showSalesSummary: json['show_sales_summary'] as bool? ?? true,
+      showCashControl: json['show_cash_control'] as bool? ?? true,
+      showNonCashQris: json['show_non_cash_qris'] as bool? ?? true,
       showSignature: json['show_signature'] as bool? ?? false,
-      footerNote: json['footer_note']?.toString() ?? '',
+      footer: json['footer'] as String? ?? '',
     );
   }
 
   Map<String, dynamic> toJson() => {
-        'header_title': headerTitle,
-        'report_title': reportTitle,
+        'header': header,
+        'title': title,
         'subtitle': subtitle,
-        'header_divider_char': headerDividerChar,
-        'show_cash_moves_detail': showCashMovesDetail,
-        'show_non_cash_breakdown': showNonCashBreakdown,
+        'show_address': showAddress,
+        'address': address,
+        'show_sales_summary': showSalesSummary,
+        'show_cash_control': showCashControl,
+        'show_non_cash_qris': showNonCashQris,
         'show_signature': showSignature,
-        'footer_note': footerNote,
+        'footer': footer,
       };
 }
 
 class KitchenReceiptConfig {
-  final String headerTitle;
-  final bool showModifiers;
-  final bool showNotes;
+  final String header;
+  final bool showCashier;
+  final bool showNote;
 
   const KitchenReceiptConfig({
-    this.headerTitle = '*** KITCHEN / BARISTA ORDER ***',
-    this.showModifiers = true,
-    this.showNotes = true,
+    this.header = '*** PAJ KITCHEN / BARISTA ***',
+    this.showCashier = true,
+    this.showNote = true,
   });
 
   factory KitchenReceiptConfig.fromJson(Map<String, dynamic> json) {
     return KitchenReceiptConfig(
-      headerTitle: json['header_title']?.toString() ?? '*** KITCHEN / BARISTA ORDER ***',
-      showModifiers: json['show_modifiers'] as bool? ?? true,
-      showNotes: json['show_notes'] as bool? ?? true,
+      header: json['header'] as String? ?? '*** PAJ KITCHEN / BARISTA ***',
+      showCashier: json['show_cashier'] as bool? ?? true,
+      showNote: json['show_note'] as bool? ?? true,
     );
   }
 
   Map<String, dynamic> toJson() => {
-        'header_title': headerTitle,
-        'show_modifiers': showModifiers,
-        'show_notes': showNotes,
+        'header': header,
+        'show_cashier': showCashier,
+        'show_note': showNote,
       };
 }
 
-/// Top-level Receipt Configuration loaded from `/receipt_config.json` or SharedPreferences.
-/// Allows editing headers, footers, blocks, or toggling standard Odoo 19 receipt layout
-/// without recompiling the application.
+/// Master modular receipt configuration.
+/// Can be loaded dynamically from `receipt_config.json` or overridden by Odoo `pos.config`.
 class ReceiptConfig {
-  /// If true, uses the standard Odoo 19 `OrderReceipt` layout (Company info,
-  /// "Served by", `pos.config.receipt_header`, itemized lines, `pos.config.receipt_footer`).
   final bool useOdooOriginalFormat;
-
-  /// If true, overrides custom header/footer text with live `pos.config.receipt_header`
-  /// and `pos.config.receipt_footer` fetched from Odoo 19.
   final bool syncHeaderFooterFromOdoo;
-
   final CustomerReceiptConfig customerReceipt;
   final CashMoveReceiptConfig cashMove;
   final SessionCloseReceiptConfig sessionClose;
@@ -302,50 +309,34 @@ class ReceiptConfig {
         'odoo_meta': odooMeta.toJson(),
       };
 
-  static const String _prefsKey = 'pos_receipt_config_v1';
+  static const String _prefsKey = 'pos_receipt_config_json';
 
-  /// Loads `receipt_config.json` at runtime (via HTTP from local web server or SharedPreferences override).
+  /// Loads external `receipt_config.json` from local proxy/web server or saved preferences.
   static Future<ReceiptConfig> load({String? baseUrl}) async {
-    ReceiptConfig baseConfig = const ReceiptConfig();
-
-    // 1. Try loading external `receipt_config.json` from local static server (web or 127.0.0.1:8089)
     try {
-      final Uri configUri = kIsWeb
+      final Uri uri = kIsWeb
           ? Uri.base.resolve('/receipt_config.json')
           : Uri.parse('${baseUrl ?? "http://127.0.0.1:8089"}/receipt_config.json');
-      final response = await http.get(configUri).timeout(const Duration(milliseconds: 800));
+      final response = await http.get(uri).timeout(const Duration(milliseconds: 800));
       if (response.statusCode == 200 && response.body.trim().startsWith('{')) {
-        final decoded = jsonDecode(response.body) as Map<String, dynamic>;
-        baseConfig = ReceiptConfig.fromJson(decoded);
+        final map = jsonDecode(response.body) as Map<String, dynamic>;
+        final cfg = ReceiptConfig.fromJson(map);
+        try {
+          final prefs = await SharedPreferences.getInstance();
+          await prefs.setString(_prefsKey, response.body);
+        } catch (_) {}
+        return cfg;
       }
     } catch (_) {}
 
-    // 2. Check SharedPreferences for local overrides or cached Odoo metadata
     try {
       final prefs = await SharedPreferences.getInstance();
-      final savedJson = prefs.getString(_prefsKey);
-      if (savedJson != null && savedJson.trim().startsWith('{')) {
-        final savedMap = jsonDecode(savedJson) as Map<String, dynamic>;
-        final savedCfg = ReceiptConfig.fromJson(savedMap);
-        return baseConfig.copyWith(
-          useOdooOriginalFormat: savedMap.containsKey('use_odoo_original_format')
-              ? savedCfg.useOdooOriginalFormat
-              : baseConfig.useOdooOriginalFormat,
-          syncHeaderFooterFromOdoo: savedMap.containsKey('sync_header_footer_from_odoo')
-              ? savedCfg.syncHeaderFooterFromOdoo
-              : baseConfig.syncHeaderFooterFromOdoo,
-          odooMeta: savedCfg.odooMeta,
-        );
+      final saved = prefs.getString(_prefsKey);
+      if (saved != null && saved.trim().startsWith('{')) {
+        return ReceiptConfig.fromJson(jsonDecode(saved) as Map<String, dynamic>);
       }
     } catch (_) {}
 
-    return baseConfig;
-  }
-
-  Future<void> save() async {
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setString(_prefsKey, jsonEncode(toJson()));
-    } catch (_) {}
+    return const ReceiptConfig();
   }
 }

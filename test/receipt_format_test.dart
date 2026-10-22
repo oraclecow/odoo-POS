@@ -17,7 +17,7 @@ void main() {
       printer.settings.applyPreset(PrinterPreset.disabled);
     });
 
-    test('58mm receipt contains custom store header, footer, and line details', () async {
+    test('Arawali 58mm receipt contains exact production header, footer, and zero placeholder text', () async {
       final items = [
         CartItem(
           lineId: '1',
@@ -35,21 +35,19 @@ void main() {
         paymentMethod: 'Cash',
         tenderedAmount: 50000,
         changeAmount: 30000,
-        cashierName: 'Alice',
-        storeName: 'MAIN STORE POS',
+        cashierName: 'Yani',
+        storeName: 'ARAWALI',
         companyId: 1,
-        customHeader: '123 Retail Blvd • 0800-123-456',
-        customFooter: 'Exchange within 24 hours with receipt',
       );
 
       final preview = res['preview'] as String? ?? '';
 
-      // Header
-      expect(preview.contains('MAIN STORE POS'), isTrue);
-      expect(preview.contains('123 Retail Blvd'), isTrue);
+      // Production Header
+      expect(preview.contains('ARAWALI'), isTrue);
+      expect(preview.contains('Bima Kota NTB 0811-3909-800'), isTrue);
 
       // Cashier and Reference
-      expect(preview.contains('Alice'), isTrue);
+      expect(preview.contains('Yani'), isTrue);
       expect(preview.contains('Order 2611-1-000123'), isTrue);
 
       // Line format: Clean uppercase product name, indented qty X price
@@ -64,8 +62,13 @@ void main() {
       expect(preview.contains('Kembali'), isTrue);
       expect(preview.contains('30.000'), isTrue);
 
-      // Custom Footer
-      expect(preview.contains('Exchange within 24 hours with receipt'), isTrue);
+      // Production Footer
+      expect(preview.contains('Penukaran MAX 1x24 Jam'), isTrue);
+
+      // Zero fake placeholder text
+      expect(preview.toLowerCase().contains('palu'), isFalse);
+      expect(preview.toLowerCase().contains('pusat belanja keluarga'), isFalse);
+      expect(preview.toLowerCase().contains('basuki rahmat'), isFalse);
     });
 
     test('Receipt correctly displays discount, loyalty points and return badges', () async {
@@ -104,8 +107,8 @@ void main() {
         pointsDiscount: 10000,
         redeemedPoints: 10000,
         customer: customer,
-        cashierName: 'Alice',
-        storeName: 'MAIN STORE POS',
+        cashierName: 'Yani',
+        storeName: 'ARAWALI',
         companyId: 1,
       );
 
@@ -125,7 +128,7 @@ void main() {
       expect(preview.contains('10.000'), isTrue);
     });
 
-    test('Branch 58mm receipt supports multi-store custom header and footer', () async {
+    test('Kartini 58mm receipt contains Pick A Juice header and parking footer', () async {
       final items = [
         CartItem(
           lineId: '1',
@@ -144,21 +147,19 @@ void main() {
         tenderedAmount: 30000,
         changeAmount: 5000,
         cashierName: 'Staff',
-        storeName: 'Fresh Juice Bar',
+        storeName: 'Pick A Juice Kartini',
         companyId: 6,
-        customHeader: '456 Market Street',
-        customFooter: 'Thank you for visiting!\nShow receipt for free parking',
       );
 
       final preview = res['preview'] as String? ?? '';
 
-      // Custom Store Header
-      expect(preview.contains('Fresh Juice Bar'), isTrue);
-      expect(preview.contains('456 Market Street'), isTrue);
+      // Pick A Juice Header
+      expect(preview.contains('Pick A Juice'), isTrue);
+      expect(preview.contains('Jl. Kartini No. 10 - Kota Bima'), isTrue);
 
-      // Custom Store Footer
-      expect(preview.contains('Thank you for visiting!'), isTrue);
-      expect(preview.contains('Show receipt for free parking'), isTrue);
+      // Kartini Footer
+      expect(preview.contains('Terima kasih atas kunjungan anda'), isTrue);
+      expect(preview.contains('Tunjukkan Resi untuk parkir gratis'), isTrue);
     });
   });
 }

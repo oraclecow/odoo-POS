@@ -206,8 +206,8 @@ class _PointExchangeDialogState extends State<PointExchangeDialog> {
                   ),
                   TextButton.icon(
                     onPressed: _onRedeemAll,
-                    icon: const Icon(Icons.flash_on_rounded, size: 16, color: AppColors.brandOrange),
-                    label: const Text('Tukar Semua', style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.brandOrange)),
+                    icon: const Icon(Icons.flash_on_rounded, size: 16, color: AppColors.arawaliOrange),
+                    label: const Text('Tukar Semua', style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.arawaliOrange)),
                   ),
                 ],
               ),

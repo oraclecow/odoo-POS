@@ -83,7 +83,17 @@ class CartItem {
 
   int get originalUnitPrice => customUnitPrice ?? (product.price + modifiers.extraPriceTotal);
 
-  int get lineTotal => unitPrice * quantity;
+  /// Line total in IDR.
+  /// When a percentage discount is applied, it computes (base * quantity * (1.0 - discount / 100.0)).round()
+  /// across the full line quantity rather than multiplying pre-rounded unit prices.
+  /// This ensures 100% exact parity with Odoo 19's account.tax engine and avoids closing session imbalances.
+  int get lineTotal {
+    if (discountPercent != null && discountPercent! > 0) {
+      final base = customUnitPrice ?? (product.price + modifiers.extraPriceTotal);
+      return (base * quantity * (1.0 - discountPercent! / 100.0)).round();
+    }
+    return unitPrice * quantity;
+  }
 
   CartItem copyWith({
     int? quantity,

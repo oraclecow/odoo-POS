@@ -30,8 +30,8 @@ void main() {
     expect(find.byType(TextField), findsOneWidget);
     expect(find.text('Scan barcode atau ketik nama produk / kode SKU...'), findsOneWidget);
 
-    // Verify 'Semua' and 'Archived' categories are not shown for retail POS
+    // Verify 'Semua' and 'Arawali Store' categories are not shown for retail POS
     expect(find.text('Semua'), findsNothing);
-    expect(find.text('Archived'), findsNothing);
+    expect(find.text('Arawali Store'), findsNothing);
   });
 }

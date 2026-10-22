@@ -14,46 +14,50 @@ class CashMoveReceiptTemplate {
     required int amount,
     required String reason,
     String? cashierName,
-    String? storeNameOverride,
   }) {
     final doc = EscPosBuilder(cols: cols);
     final isOut = type == 'out';
     final title = isOut ? 'CASH OUT VOUCHER' : 'CASH IN VOUCHER';
-    final headerTitle = (storeNameOverride != null && storeNameOverride.isNotEmpty)
-        ? storeNameOverride
-        : config.headerTitle;
 
-    // 1. Header Block
-    doc.centerLine(headerTitle, bold: true);
-    if (config.subtitle.isNotEmpty) {
-      doc.centerMultiline(config.subtitle);
-    }
+    // 1. Optional Banner (disabled by default per config)
     if (config.showVoucherBanner) {
       doc.title("*** $title ***");
     }
+
+    // 2. Store Header
+    if (config.header.isNotEmpty) {
+      doc.centerMultiline(config.header, bold: true);
+    }
+    doc.doubleDivider();
+
+    // 3. Body Rows
+    final timeStr = DateFormat('dd/MM/yyyy HH:mm:ss').format(DateTime.now());
+    doc.row("Date/Time", timeStr);
+    if (config.showCashier && cashierName != null && cashierName.isNotEmpty) {
+      doc.row("Cashier", cashierName);
+    }
+    doc.row("Type", isOut ? "Cash Out (Tarik Kas)" : "Cash In (Setor Kas)");
+    doc.row("Amount", _currency.format(amount), bold: true);
     doc.divider();
 
-    // 2. Metadata & Amount Block
-    final timeStr = DateFormat('yyyy-MM-dd HH:mm:ss').format(DateTime.now());
-    doc.leftLine("Waktu   : $timeStr");
-    doc.leftLine("Kasir   : ${cashierName ?? 'Staff'}");
-    doc.leftLine("Tipe    : ${isOut ? 'KAS KELUAR (OUT)' : 'KAS MASUK (IN)'}", bold: true);
-    doc.divider();
+    if (config.showReason) {
+      doc.leftLine("Reason: $reason");
+    }
 
-    doc.row("NOMINAL :", _currency.format(amount), bold: true);
-    doc.leftLine("Alasan / Keterangan:");
-    doc.leftLine(reason);
-    doc.divider();
-
-    // 3. Optional Signature / Footer Block
+    // 4. Optional Signature Block (disabled by default per config)
     if (config.showSignature) {
       doc.blankLine();
-      doc.leftLine("Signature: _____________________");
-    }
-    if (config.footerNote.isNotEmpty) {
-      doc.centerMultiline(config.footerNote);
+      doc.leftLine("Signature:");
+      doc.blankLine();
+      doc.leftLine('.' * (cols ~/ 2));
     }
 
-    return doc.build(autoCutter: autoCutter, is80mm: is80mm, trailingBlankLine: true);
+    // 5. Optional Footer
+    if (config.footer.isNotEmpty) {
+      doc.divider();
+      doc.centerMultiline(config.footer);
+    }
+
+    return doc.build(autoCutter: autoCutter, is80mm: is80mm);
   }
 }

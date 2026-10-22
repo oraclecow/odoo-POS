@@ -6,10 +6,10 @@ project(runner LANGUAGES CXX C)
 
 # The name of the executable created for the application. Change this to change
 # the on-disk name of your application.
-set(BINARY_NAME "open_odoo_pos")
+set(BINARY_NAME "arapos")
 # The unique GTK application identifier for this application. See:
 # https://wiki.gnome.org/HowDoI/ChooseApplicationID
-set(APPLICATION_ID "org.openodoo.pos")
+set(APPLICATION_ID "com.arawali.pos.flutter_odoo_pos")
 
 # Explicitly opt in to modern CMake behaviors to avoid warnings with recent
 # versions of CMake.

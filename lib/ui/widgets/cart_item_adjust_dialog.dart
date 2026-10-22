@@ -184,7 +184,7 @@ class _CartItemAdjustDialogState extends State<CartItemAdjustDialog> {
                           const SizedBox(height: 2),
                           Text(
                             widget.item.modifiers.summaryDescription,
-                            style: const TextStyle(fontSize: 12, color: AppColors.brandOrange, fontWeight: FontWeight.w700),
+                            style: const TextStyle(fontSize: 12, color: AppColors.arawaliOrange, fontWeight: FontWeight.w700),
                           ),
                         ],
                         const SizedBox(height: 4),
@@ -206,7 +206,7 @@ class _CartItemAdjustDialogState extends State<CartItemAdjustDialog> {
                               style: TextStyle(
                                 fontSize: 13.5,
                                 fontWeight: FontWeight.w800,
-                                color: hasDiscount ? AppColors.brandOrange : AppColors.textPrimary,
+                                color: hasDiscount ? AppColors.arawaliOrange : AppColors.textPrimary,
                               ),
                             ),
                             if (hasDiscount) ...[
@@ -281,7 +281,7 @@ class _CartItemAdjustDialogState extends State<CartItemAdjustDialog> {
                                   decoration: BoxDecoration(
                                     color: Colors.white,
                                     borderRadius: BorderRadius.circular(8),
-                                    border: Border.all(color: AppColors.brandOrange, width: 1.5),
+                                    border: Border.all(color: AppColors.arawaliOrange, width: 1.5),
                                   ),
                                   child: Text(
                                     '$_quantity',
@@ -293,7 +293,7 @@ class _CartItemAdjustDialogState extends State<CartItemAdjustDialog> {
                             IconButton(
                               onPressed: _incrementQty,
                               icon: const Icon(Icons.add_circle_outline_rounded, size: 28),
-                              color: AppColors.brandOrange,
+                              color: AppColors.arawaliOrange,
                             ),
                           ],
                         ),
@@ -396,7 +396,7 @@ class _CartItemAdjustDialogState extends State<CartItemAdjustDialog> {
                     children: [
                       const Row(
                         children: [
-                          Icon(Icons.lock_outline_rounded, size: 15, color: AppColors.brandOrange),
+                          Icon(Icons.lock_outline_rounded, size: 15, color: AppColors.arawaliOrange),
                           SizedBox(width: 4),
                           Text(
                             'Diskon Item (Butuh PIN)',

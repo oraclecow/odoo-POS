@@ -89,13 +89,13 @@ BEGIN
     BEGIN
         BLOCK "040904e4"
         BEGIN
-            VALUE "CompanyName", "Open Odoo POS Community" "\0"
-            VALUE "FileDescription", "Open Odoo POS Native Client" "\0"
+            VALUE "CompanyName", "Arawali Store" "\0"
+            VALUE "FileDescription", "AraPOS - Point of Sale Native Client" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
-            VALUE "InternalName", "OpenOdooPOS" "\0"
-            VALUE "LegalCopyright", "Copyright (C) 2026 Open Odoo POS Contributors. Licensed under AGPL-3.0." "\0"
-            VALUE "OriginalFilename", "OpenOdooPOS.exe" "\0"
-            VALUE "ProductName", "Open Odoo POS" "\0"
+            VALUE "InternalName", "AraPOS" "\0"
+            VALUE "LegalCopyright", "Copyright (C) 2026 Arawali Store. All rights reserved." "\0"
+            VALUE "OriginalFilename", "arapos.exe" "\0"
+            VALUE "ProductName", "AraPOS" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END

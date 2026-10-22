@@ -231,7 +231,7 @@ class SessionOpenView extends StatelessWidget {
               TextField(
                 controller: notesController,
                 decoration: InputDecoration(
-                  hintText: 'e.g. Opened from Open Odoo POS',
+                  hintText: 'e.g. Opened from Arawali Store POS',
                   border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
                   contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
                 ),

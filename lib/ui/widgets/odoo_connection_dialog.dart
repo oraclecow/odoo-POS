@@ -19,19 +19,10 @@ class OdooConnectionDialog extends StatefulWidget {
 }
 
 class _OdooConnectionDialogState extends State<OdooConnectionDialog> {
-  late TextEditingController _urlController;
   late TextEditingController _dbController;
-  late TextEditingController _loginController;
-  late TextEditingController _passwordController;
-  late TextEditingController _companyIdController;
-  late TextEditingController _posConfigIdController;
-  late TextEditingController _displayNameController;
-  late TextEditingController _receiptHeaderController;
-  late TextEditingController _receiptFooterController;
+  late TextEditingController _urlController;
   final TextEditingController _pinController = TextEditingController();
-
-  late PosBusinessMode _mode;
-  bool _obscurePassword = true;
+  late OdooCompanyProfile _selectedProfile;
   bool _isLoading = false;
   String? _statusMessage;
   bool _isSuccess = false;
@@ -39,32 +30,9 @@ class _OdooConnectionDialogState extends State<OdooConnectionDialog> {
   @override
   void initState() {
     super.initState();
-    final profile = widget.odooClient.profile;
-    _mode = profile.mode;
-    _urlController = TextEditingController(text: widget.odooClient.baseUrl);
     _dbController = TextEditingController(text: widget.odooClient.database);
-    _loginController = TextEditingController(text: profile.login);
-    _passwordController = TextEditingController(text: profile.password);
-    _companyIdController = TextEditingController(text: profile.companyId.toString());
-    _posConfigIdController = TextEditingController(text: profile.posConfigId.toString());
-    _displayNameController = TextEditingController(text: profile.displayName);
-    _receiptHeaderController = TextEditingController(text: profile.receiptHeader);
-    _receiptFooterController = TextEditingController(text: profile.receiptFooter);
-  }
-
-  @override
-  void dispose() {
-    _urlController.dispose();
-    _dbController.dispose();
-    _loginController.dispose();
-    _passwordController.dispose();
-    _companyIdController.dispose();
-    _posConfigIdController.dispose();
-    _displayNameController.dispose();
-    _receiptHeaderController.dispose();
-    _receiptFooterController.dispose();
-    _pinController.dispose();
-    super.dispose();
+    _urlController = TextEditingController(text: widget.odooClient.baseUrl);
+    _selectedProfile = widget.odooClient.profile;
   }
 
   Future<void> _testAndConnect() async {
@@ -74,39 +42,9 @@ class _OdooConnectionDialogState extends State<OdooConnectionDialog> {
     });
 
     try {
-      final url = _urlController.text.trim();
-      final db = _dbController.text.trim();
-      final login = _loginController.text.trim();
-      final password = _passwordController.text;
-      final companyId = int.tryParse(_companyIdController.text.trim()) ?? 1;
-      final posConfigId = int.tryParse(_posConfigIdController.text.trim()) ?? 1;
-      final displayName = _displayNameController.text.trim().isEmpty
-          ? 'Store POS #$posConfigId'
-          : _displayNameController.text.trim();
-      final receiptHeader = _receiptHeaderController.text.trim().isEmpty
-          ? 'Point of Sale Receipt'
-          : _receiptHeaderController.text.trim();
-      final receiptFooter = _receiptFooterController.text.trim().isEmpty
-          ? 'Thank you for your business!'
-          : _receiptFooterController.text.trim();
-
-      if (url.isEmpty || db.isEmpty || login.isEmpty) {
-        throw Exception('Server URL, Database, and Login cannot be empty.');
-      }
-
-      widget.odooClient.baseUrl = url;
-      widget.odooClient.database = db;
-      final newProfile = OdooCompanyProfile(
-        displayName: displayName,
-        login: login,
-        password: password,
-        companyId: companyId,
-        posConfigId: posConfigId,
-        receiptHeader: receiptHeader,
-        receiptFooter: receiptFooter,
-        mode: _mode,
-      );
-      widget.odooClient.switchProfile(newProfile);
+      widget.odooClient.baseUrl = _urlController.text.trim();
+      widget.odooClient.switchDatabase(_dbController.text.trim());
+      widget.odooClient.switchProfile(_selectedProfile);
 
       final uid = await widget.odooClient.authenticate();
       final sessionId = await widget.odooClient.fetchActiveSession();
@@ -116,13 +54,13 @@ class _OdooConnectionDialogState extends State<OdooConnectionDialog> {
       setState(() {
         _isLoading = false;
         _isSuccess = true;
-        _statusMessage = 'Connected! UID: $uid • ${sessionId != null ? "Active Session: ${widget.odooClient.activeSessionName ?? "#$sessionId"}" : "Note: No active POS session open for Config #$posConfigId."}';
+        _statusMessage = 'Terhubung! UID: $uid • ${sessionId != null ? "Sesi Kasir: ${widget.odooClient.activeSessionName ?? '#$sessionId'} AKTIF" : "⚠️ Tidak ada sesi kasir yang terbuka untuk toko ini."}';
       });
     } catch (e) {
       setState(() {
         _isLoading = false;
         _isSuccess = false;
-        _statusMessage = 'Connection failed: $e';
+        _statusMessage = 'Gagal terhubung: $e';
       });
     }
   }
@@ -131,7 +69,7 @@ class _OdooConnectionDialogState extends State<OdooConnectionDialog> {
     final pin = _pinController.text.trim();
     if (pin.length < 4) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('PIN must be at least 4 digits.'), backgroundColor: Colors.red),
+        const SnackBar(content: Text('PIN harus minimal 4 digit.'), backgroundColor: Colors.red),
       );
       return;
     }
@@ -140,7 +78,7 @@ class _OdooConnectionDialogState extends State<OdooConnectionDialog> {
     _pinController.clear();
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Admin PIN updated to: '), backgroundColor: Colors.green),
+        SnackBar(content: Text('PIN Admin berhasil diperbarui menjadi: $pin'), backgroundColor: Colors.green),
       );
     }
   }
@@ -150,9 +88,9 @@ class _OdooConnectionDialogState extends State<OdooConnectionDialog> {
     return Dialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
       child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 560, maxHeight: 720),
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24.0),
+        constraints: const BoxConstraints(maxWidth: 520),
+        child: Padding(
+          padding: const EdgeInsets.all(22.0),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -162,10 +100,10 @@ class _OdooConnectionDialogState extends State<OdooConnectionDialog> {
                 children: [
                   const Row(
                     children: [
-                      Icon(Icons.settings_suggest_rounded, color: AppColors.primaryGreen, size: 24),
+                      Icon(Icons.settings_suggest_rounded, color: AppColors.primaryGreen),
                       SizedBox(width: 8),
                       Text(
-                        'ODOO SERVER & REGISTER SETUP',
+                        'PENGATURAN ODOO & DATABASE',
                         style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, letterSpacing: 0.5),
                       ),
                     ],
@@ -177,14 +115,14 @@ class _OdooConnectionDialogState extends State<OdooConnectionDialog> {
                 ],
               ),
               const Divider(color: AppColors.divider),
-              const SizedBox(height: 12),
+              const SizedBox(height: 10),
 
+              // Server URL Field
               const Text('Odoo Server URL', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppColors.textSecondary)),
               const SizedBox(height: 4),
               TextField(
                 controller: _urlController,
                 decoration: InputDecoration(
-                  hintText: 'http://192.168.1.100:8069 or https://erp.yourdomain.com',
                   isDense: true,
                   border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
                   prefixIcon: const Icon(Icons.dns_rounded, size: 20),
@@ -192,180 +130,48 @@ class _OdooConnectionDialogState extends State<OdooConnectionDialog> {
               ),
               const SizedBox(height: 12),
 
-              const Text('Database Name', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppColors.textSecondary)),
+              // Database Field
+              const Text('Database Odoo', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppColors.textSecondary)),
               const SizedBox(height: 4),
               TextField(
                 controller: _dbController,
                 decoration: InputDecoration(
-                  hintText: 'e.g. odoo, production, main_store',
                   isDense: true,
                   border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
                   prefixIcon: const Icon(Icons.storage_rounded, size: 20),
+                  hintText: 'arawali',
                 ),
               ),
               const SizedBox(height: 12),
 
-              Row(
-                children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text('Login / Username', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppColors.textSecondary)),
-                        const SizedBox(height: 4),
-                        TextField(
-                          controller: _loginController,
-                          decoration: InputDecoration(
-                            hintText: 'e.g. admin or pos_agent',
-                            isDense: true,
-                            border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-                            prefixIcon: const Icon(Icons.person_outline, size: 20),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text('Password', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppColors.textSecondary)),
-                        const SizedBox(height: 4),
-                        TextField(
-                          controller: _passwordController,
-                          obscureText: _obscurePassword,
-                          decoration: InputDecoration(
-                            hintText: '••••••••',
-                            isDense: true,
-                            border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-                            prefixIcon: const Icon(Icons.lock_outline, size: 20),
-                            suffixIcon: IconButton(
-                              icon: Icon(_obscurePassword ? Icons.visibility_off : Icons.visibility, size: 18),
-                              onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 12),
-
-              Row(
-                children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text('POS Config ID', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppColors.textSecondary)),
-                        const SizedBox(height: 4),
-                        TextField(
-                          controller: _posConfigIdController,
-                          keyboardType: TextInputType.number,
-                          decoration: InputDecoration(
-                            hintText: '1',
-                            isDense: true,
-                            border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-                            prefixIcon: const Icon(Icons.point_of_sale_rounded, size: 20),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text('Company ID', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppColors.textSecondary)),
-                        const SizedBox(height: 4),
-                        TextField(
-                          controller: _companyIdController,
-                          keyboardType: TextInputType.number,
-                          decoration: InputDecoration(
-                            hintText: '1',
-                            isDense: true,
-                            border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-                            prefixIcon: const Icon(Icons.business_rounded, size: 20),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 12),
-
-              const Text('Business Mode', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppColors.textSecondary)),
+              // Company Profile Dropdown
+              const Text('Pilih Toko / Company Profil', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppColors.textSecondary)),
               const SizedBox(height: 4),
-              SegmentedButton<PosBusinessMode>(
-                segments: const [
-                  ButtonSegment(value: PosBusinessMode.retail, label: Text('Retail / Shop'), icon: Icon(Icons.shopping_basket_outlined)),
-                  ButtonSegment(value: PosBusinessMode.fnb, label: Text('F&B / Restaurant'), icon: Icon(Icons.restaurant_rounded)),
-                ],
-                selected: {_mode},
-                onSelectionChanged: (v) => setState(() => _mode = v.first),
-              ),
-              const SizedBox(height: 12),
-
-              const Text('Register Display Name', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppColors.textSecondary)),
-              const SizedBox(height: 4),
-              TextField(
-                controller: _displayNameController,
-                decoration: InputDecoration(
-                  hintText: 'e.g. Counter 1 / Retail Register',
-                  isDense: true,
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-                  prefixIcon: const Icon(Icons.storefront_rounded, size: 20),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12),
+                decoration: BoxDecoration(
+                  border: Border.all(color: AppColors.border),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: DropdownButtonHideUnderline(
+                  child: DropdownButton<OdooCompanyProfile>(
+                    value: _selectedProfile,
+                    isExpanded: true,
+                    items: OdooCompanyProfile.availableProfiles.map((p) {
+                      return DropdownMenuItem<OdooCompanyProfile>(
+                        value: p,
+                        child: Text(p.displayName, style: const TextStyle(fontSize: 13.5, fontWeight: FontWeight.w600)),
+                      );
+                    }).toList(),
+                    onChanged: (val) {
+                      if (val != null) setState(() => _selectedProfile = val);
+                    },
+                  ),
                 ),
               ),
               const SizedBox(height: 12),
 
-              Row(
-                children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text('Receipt Header (Address / Phone)', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppColors.textSecondary)),
-                        const SizedBox(height: 4),
-                        TextField(
-                          controller: _receiptHeaderController,
-                          decoration: InputDecoration(
-                            hintText: 'e.g. 123 Main St • 0812-3456-7890',
-                            isDense: true,
-                            border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-                            prefixIcon: const Icon(Icons.receipt_long_rounded, size: 20),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text('Receipt Footer', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppColors.textSecondary)),
-                        const SizedBox(height: 4),
-                        TextField(
-                          controller: _receiptFooterController,
-                          decoration: InputDecoration(
-                            hintText: 'e.g. Thank you for shopping with us!',
-                            isDense: true,
-                            border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-                            prefixIcon: const Icon(Icons.short_text_rounded, size: 20),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 14),
-
+              // Ubah PIN Admin Section
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                 decoration: BoxDecoration(
@@ -385,7 +191,7 @@ class _OdooConnectionDialogState extends State<OdooConnectionDialog> {
                         obscureText: true,
                         style: const TextStyle(fontSize: 13),
                         decoration: const InputDecoration(
-                          hintText: 'Admin PIN (min 4 digits, default 1234)',
+                          hintText: 'Ubah PIN Admin (min 4 digit)',
                           isDense: true,
                           counterText: '',
                           border: InputBorder.none,
@@ -399,13 +205,14 @@ class _OdooConnectionDialogState extends State<OdooConnectionDialog> {
                         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
                         elevation: 0,
                       ),
-                      child: const Text('Save PIN', style: TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.bold)),
+                      child: const Text('Simpan PIN', style: TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.bold)),
                     ),
                   ],
                 ),
               ),
               const SizedBox(height: 14),
 
+              // Live Status Box
               if (_statusMessage != null)
                 Container(
                   width: double.infinity,
@@ -430,7 +237,7 @@ class _OdooConnectionDialogState extends State<OdooConnectionDialog> {
                 children: [
                   OutlinedButton(
                     onPressed: () => Navigator.pop(context),
-                    child: const Text('Close'),
+                    child: const Text('Tutup'),
                   ),
                   const SizedBox(width: 10),
                   Expanded(
@@ -443,7 +250,7 @@ class _OdooConnectionDialogState extends State<OdooConnectionDialog> {
                       child: _isLoading
                           ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
                           : const Text(
-                              'Test Connection & Sync Catalog',
+                              'Hubungkan & Sinkronisasi',
                               style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
                             ),
                     ),

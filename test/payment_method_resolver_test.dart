@@ -3,7 +3,7 @@ import 'package:open_odoo_pos/data/services/odoo_client.dart';
 
 void main() {
   group('Multi-Store Payment Method Dynamic Resolver Tests', () {
-    test('Resolves F&B Store (Config 14, Co 6) payment methods correctly', () {
+    test('Resolves Kartini (Config 14, Co 6) payment methods correctly', () {
       final registry = StorePaymentRegistry(
         posConfigId: 14,
         methods: const [
@@ -22,7 +22,7 @@ void main() {
       expect(registry.resolveMethod('ShopeeFood')?.id, 30);
     });
 
-    test('Resolves Retail Store (Config 2, Co 1) payment methods and rejects unconfigured aggregators', () {
+    test('Resolves Arawali (Config 2, Co 1) payment methods and rejects unconfigured aggregators', () {
       final registry = StorePaymentRegistry(
         posConfigId: 2,
         methods: const [
@@ -41,7 +41,7 @@ void main() {
       expect(registry.resolveMethod('ShopeeFood'), isNull);
     });
 
-    test('Resolves Branch 1 (Config 6, Co 3) payment methods correctly', () {
+    test('Resolves Bakery (Config 6, Co 3) payment methods correctly', () {
       final registry = StorePaymentRegistry(
         posConfigId: 6,
         methods: const [
@@ -58,7 +58,7 @@ void main() {
       expect(registry.resolveMethod('ShopeeFood'), isNull);
     });
 
-    test('Resolves Branch 2 (Config 13, Co 2) payment methods correctly', () {
+    test('Resolves PAJ Santi (Config 13, Co 2) payment methods correctly', () {
       final registry = StorePaymentRegistry(
         posConfigId: 13,
         methods: const [
@@ -74,11 +74,11 @@ void main() {
       expect(registry.resolveMethod('GrabFood'), isNull);
     });
 
-    test('Resolves Branch 3 (Config 15, Co 7) payment methods correctly', () {
+    test('Resolves PAJ SKW (Config 15, Co 7) payment methods correctly', () {
       final registry = StorePaymentRegistry(
         posConfigId: 15,
         methods: const [
-          PosPaymentMethodInfo(id: 18, name: 'Cash Branch 3', isCashCount: true, type: 'cash'),
+          PosPaymentMethodInfo(id: 18, name: 'Cash PAJ SKW', isCashCount: true, type: 'cash'),
           PosPaymentMethodInfo(id: 20, name: 'QRIS / Transfer', isCashCount: false, type: 'bank'),
         ],
       );

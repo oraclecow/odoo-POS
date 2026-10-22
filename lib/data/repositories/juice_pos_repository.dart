@@ -57,6 +57,30 @@ class JuicePosRepository {
     return list.isNotEmpty ? list.first : null;
   }
 
+  Future<Customer> createCustomer({
+    required String name,
+    required String phone,
+    String? street,
+    String? city,
+  }) async {
+    if (odooClient != null) {
+      return await odooClient!.createCustomer(
+        name: name,
+        phone: phone,
+        street: street,
+        city: city,
+      );
+    }
+    // Local fallback
+    return Customer(
+      id: DateTime.now().millisecondsSinceEpoch,
+      name: name.trim(),
+      phone: phone.trim(),
+      tier: 'Member',
+      points: 0.0,
+    );
+  }
+
   static const List<Customer> _defaultCustomers = [
     Customer(id: 101, name: 'Budi Santoso', phone: '081234567890', tier: 'Gold Member', points: 120),
     Customer(id: 102, name: 'Siti Rahayu', phone: '081398765432', tier: 'Silver Member', points: 45),
@@ -73,12 +97,5 @@ class JuicePosRepository {
     return null;
   }
 
-  static const List<JuiceProduct> _defaultProducts = [
-    JuiceProduct(id: 1001, name: 'Espresso Single Shot', price: 18000, category: 'Beverages', barcode: '8990001001', defaultCode: 'DEMO-001', qtyAvailable: 50),
-    JuiceProduct(id: 1002, name: 'Iced Caffe Latte', price: 25000, category: 'Beverages', barcode: '8990001002', defaultCode: 'DEMO-002', qtyAvailable: 42),
-    JuiceProduct(id: 1003, name: 'Fresh Orange Juice', price: 22000, category: 'Beverages', barcode: '8990001003', defaultCode: 'DEMO-003', qtyAvailable: 30),
-    JuiceProduct(id: 1004, name: 'Butter Croissant', price: 20000, category: 'Bakery', barcode: '8990001004', defaultCode: 'DEMO-004', qtyAvailable: 18),
-    JuiceProduct(id: 1005, name: 'Club Sandwich', price: 35000, category: 'Food', barcode: '8990001005', defaultCode: 'DEMO-005', qtyAvailable: 12),
-    JuiceProduct(id: 1006, name: 'Mineral Water 600ml', price: 6000, category: 'Beverages', barcode: '8990001006', defaultCode: 'DEMO-006', qtyAvailable: 120),
-  ];
+  static const List<JuiceProduct> _defaultProducts = [];
 }

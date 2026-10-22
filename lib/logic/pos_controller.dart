@@ -1,7 +1,9 @@
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:uuid/uuid.dart';
 import '../data/models/juice_product.dart';
 import '../data/models/modifier.dart';
 import '../data/models/customer.dart';
@@ -99,14 +101,14 @@ class PosController extends ChangeNotifier {
         return;
       }
     } catch (_) {}
-    _imageBaseUrl = _repository.odooClient?.baseUrl ?? 'http://localhost:8069';
+    _imageBaseUrl = _repository.odooClient?.baseUrl ?? 'http://192.168.201.201:8069';
   }
 
   PosRuntimeConfig _runtimeConfig = const PosRuntimeConfig();
   PosRuntimeConfig get runtimeConfig => _runtimeConfig;
 
   OdooCompanyProfile get activeProfile =>
-      _repository.odooClient?.profile ?? OdooCompanyProfile.defaultDemoProfile;
+      _repository.odooClient?.profile ?? OdooCompanyProfile.availableProfiles.first;
 
   PosBusinessMode get businessMode => activeProfile.mode;
   WorkerUiGuardrails get guardrails => activeProfile.guardrails;
@@ -115,8 +117,8 @@ class PosController extends ChangeNotifier {
     try {
       _runtimeConfig = await PosRuntimeConfig.load();
       await loadProductImageSettings();
-      await _repository.odooClient?.loadSavedSettings();
       await _checkLocalProxy();
+      await _repository.odooClient?.loadSavedSettings();
       await loadCashiers();
       await checkSession();
     } catch (_) {}
@@ -195,7 +197,6 @@ class PosController extends ChangeNotifier {
     final client = _repository.odooClient;
     if (client == null) return;
     client.switchProfile(newProfile);
-    await _checkLocalProxy();
     await client.authenticate();
     await checkSession();
     await syncOdooCatalog();
@@ -211,7 +212,7 @@ class PosController extends ChangeNotifier {
     return await client.fetchExpectedOpeningCash();
   }
 
-  Future<int> openSession({double openingCash = 0.0, String notes = 'Opened from Open Odoo POS'}) async {
+  Future<int> openSession({double openingCash = 0.0, String notes = 'Opened from AraPOS'}) async {
     final client = _repository.odooClient;
     if (client == null) {
       throw Exception('Odoo client not configured');
@@ -363,7 +364,7 @@ class PosController extends ChangeNotifier {
 
   List<JuiceProduct> get filteredProducts {
     Iterable<JuiceProduct> prods = _allProducts;
-    if (_selectedCategory.isNotEmpty && _selectedCategory != 'Semua' && _selectedCategory != 'All') {
+    if (_selectedCategory.isNotEmpty && _selectedCategory != 'Semua' && _selectedCategory != 'Arawali Store') {
       prods = prods.where((p) => p.category == _selectedCategory);
     }
     if (_searchQuery.isNotEmpty) {

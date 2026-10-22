@@ -9,8 +9,8 @@ class PosRuntimeConfig {
   final List<OdooCompanyProfile> profiles;
 
   const PosRuntimeConfig({
-    this.defaultOdooUrl = 'http://localhost:8069',
-    this.defaultDatabase = 'odoo',
+    this.defaultOdooUrl = 'http://192.168.201.201:8069',
+    this.defaultDatabase = 'arawali',
     this.profiles = OdooCompanyProfile.availableProfiles,
   });
 
@@ -24,8 +24,8 @@ class PosRuntimeConfig {
         : OdooCompanyProfile.availableProfiles;
 
     return PosRuntimeConfig(
-      defaultOdooUrl: json['default_odoo_url']?.toString() ?? 'http://localhost:8069',
-      defaultDatabase: json['default_database']?.toString() ?? 'odoo',
+      defaultOdooUrl: json['default_odoo_url']?.toString() ?? 'http://192.168.201.201:8069',
+      defaultDatabase: json['default_database']?.toString() ?? 'arawali',
       profiles: parsedProfiles,
     );
   }

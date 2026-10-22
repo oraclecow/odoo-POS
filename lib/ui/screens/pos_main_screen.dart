@@ -7,7 +7,6 @@ import '../widgets/order_ticket_panel.dart';
 import '../widgets/catalog_panel.dart';
 import '../widgets/order_history_panel.dart';
 import '../widgets/open_session_dialog.dart';
-import '../widgets/odoo_connection_dialog.dart';
 import '../core/app_colors.dart';
 
 class PosMainScreen extends ConsumerStatefulWidget {
@@ -123,27 +122,10 @@ class _PosMainScreenState extends ConsumerState<PosMainScreen> {
                           const SizedBox(width: 8),
                           Expanded(
                             child: Text(
-                              'No active POS session in Odoo for ${odooClient.profile.displayName}. Configure server or open a session to submit orders.',
+                              'No active POS session in Odoo 19 for ${odooClient.profile.displayName}. Open a session to submit orders.',
                               style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.w600, color: Colors.amber.shade900),
                             ),
                           ),
-                          OutlinedButton.icon(
-                            icon: Icon(Icons.settings_suggest_rounded, size: 16, color: Colors.amber.shade900),
-                            label: Text('Server Setup', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.amber.shade900)),
-                            style: OutlinedButton.styleFrom(
-                              side: BorderSide(color: Colors.amber.shade900),
-                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                              minimumSize: Size.zero,
-                              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                            ),
-                            onPressed: () {
-                              showDialog(
-                                context: context,
-                                builder: (_) => OdooConnectionDialog(odooClient: odooClient, controller: controller),
-                              );
-                            },
-                          ),
-                          const SizedBox(width: 8),
                           TextButton.icon(
                             icon: const Icon(Icons.play_arrow_rounded, size: 16),
                             label: const Text('Open Session', style: TextStyle(fontWeight: FontWeight.bold)),

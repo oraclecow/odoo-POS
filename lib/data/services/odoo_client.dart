@@ -15,7 +15,6 @@ import '../models/order.dart';
 export '../../core/config/app_mode.dart';
 export '../../core/models/odoo_pos_models.dart';
 
-
 class OdooClient {
   String baseUrl;
   String database;
@@ -29,11 +28,11 @@ class OdooClient {
   StorePaymentRegistry? _paymentRegistry;
 
   OdooClient({
-    this.baseUrl = 'http://localhost:8069',
-    this.database = 'odoo',
+    this.baseUrl = 'http://192.168.201.201:8069',
+    this.database = 'arawali',
     OdooCompanyProfile? profile,
     http.Client? httpClient,
-  })  : profile = profile ?? OdooCompanyProfile.defaultDemoProfile,
+  })  : profile = profile ?? OdooCompanyProfile.availableProfiles.first,
         _httpClient = httpClient ?? http.Client();
 
   int get currentUid => _uid ?? 0;
@@ -132,7 +131,6 @@ class OdooClient {
     }
   }
 
-
   Future<StorePaymentRegistry> fetchPaymentMethods({int? configId}) async {
     final targetConfigId = configId ?? profile.posConfigId;
     final configData = await executeKw(
@@ -191,12 +189,14 @@ class OdooClient {
       final prefs = await SharedPreferences.getInstance();
       final savedUrl = prefs.getString('odoo_base_url');
       final savedDb = prefs.getString('odoo_database');
-      final profileJson = prefs.getString('odoo_active_profile');
+      final savedProfileIndex = prefs.getInt('odoo_profile_index');
 
       if (savedUrl != null && savedUrl.isNotEmpty) baseUrl = savedUrl;
       if (savedDb != null && savedDb.isNotEmpty) database = savedDb;
-      if (profileJson != null && profileJson.isNotEmpty) {
-        profile = OdooCompanyProfile.fromMap(jsonDecode(profileJson));
+      if (savedProfileIndex != null &&
+          savedProfileIndex >= 0 &&
+          savedProfileIndex < OdooCompanyProfile.availableProfiles.length) {
+        profile = OdooCompanyProfile.availableProfiles[savedProfileIndex];
       }
     } catch (_) {}
   }
@@ -206,7 +206,10 @@ class OdooClient {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString('odoo_base_url', baseUrl);
       await prefs.setString('odoo_database', database);
-      await prefs.setString('odoo_active_profile', jsonEncode(profile.toMap()));
+      final idx = OdooCompanyProfile.availableProfiles.indexOf(profile);
+      if (idx >= 0) {
+        await prefs.setInt('odoo_profile_index', idx);
+      }
     } catch (_) {}
   }
 
@@ -366,7 +369,7 @@ class OdooClient {
   }
 
   // Open or ensure an active pos.session in Odoo 19
-  Future<int> openNewSession({double openingCash = 0.0, String notes = 'Opened from Open Odoo POS'}) async {
+  Future<int> openNewSession({double openingCash = 0.0, String notes = 'Opened from PAJ POS'}) async {
     if (_uid == null) {
       await authenticate();
     }
@@ -596,55 +599,76 @@ class OdooClient {
 
   // Fetch Live POS Categories & Product Mapping
   static const List<String> excludedCategoryKeywords = [
+    'bakery menu',
+    'arawali',
+    'event',
     'archived',
+    'gantungan kunci',
+    'snack wd',
+    'menu promo',
+    'maumau',
   ];
 
-  static bool isCategoryExcluded(String categoryName) {
+  static bool isCategoryExcluded(String categoryName, [int? companyId]) {
+    final lower = categoryName.toLowerCase().trim();
+    if (companyId == 1) {
+      return lower.contains('archived');
+    }
+    if (companyId != null) {
+      return excludedCategoryKeywords.any((kw) => lower.contains(kw));
+    }
     return false;
   }
 
   static int categorySortPriority(String cat) {
     final upper = cat.toUpperCase();
     if (upper == 'SEMUA') return 0;
-    return 10;
+    if (upper.contains('JUS BUAH')) return 1;
+    if (upper.contains('CP') || upper.contains('COLD PRESSED')) return 3;
+    if (upper.contains('DETOX')) return 4;
+    if (upper.contains('SMOOTHIES')) return 5;
+    if (upper.contains('PROTEIN')) return 6;
+    if (upper.contains('JUS BOTOL')) return 7;
+    if (upper.contains('ROTI NOURA')) return 8;
+    if (upper.contains('ROLL CAKE')) return 9;
+    if (upper.contains('TOAST')) return 10;
+    if (upper.contains('MAKANAN')) return 11;
+    if (upper.contains('MAMA UI')) return 12;
+    return 20;
   }
 
-  /// F&B mode: resolves delivery-channel pricelists (name contains "grab"/"shopee").
-  Future<Map<String, Map<int, int>>> fetchPricelistMaps() async {
-    final map = <String, Map<int, int>>{'grab': {}, 'shopee': {}};
+  // Fetch Pricelist Mapping for Grab (15) and Shopee (16) in F&B mode
+  Future<Map<int, Map<int, int>>> fetchPricelistMaps() async {
+    final map = <int, Map<int, int>>{15: {}, 16: {}};
     if (profile.isRetail) return map;
     try {
-      final lists = await executeKw(
-        'product.pricelist',
-        'search_read',
-        [[]],
-        {'fields': ['id', 'name'], 'limit': 100},
-      ) as List<dynamic>;
-      final idToChannel = <int, String>{};
-      for (final l in lists) {
-        final n = (l['name'] ?? '').toString().toLowerCase();
-        if (n.contains('grab')) idToChannel[l['id'] as int] = 'grab';
-        if (n.contains('shopee')) idToChannel[l['id'] as int] = 'shopee';
-      }
-      if (idToChannel.isEmpty) return map;
       final items = await executeKw(
         'product.pricelist.item',
         'search_read',
-        [[['pricelist_id', 'in', idToChannel.keys.toList()]]],
-        {'fields': ['pricelist_id', 'product_tmpl_id', 'product_id', 'fixed_price'], 'limit': 2000},
+        [
+          [
+            ['pricelist_id', 'in', [15, 16]],
+          ]
+        ],
+        {
+          'fields': ['pricelist_id', 'product_tmpl_id', 'product_id', 'fixed_price'],
+          'limit': 1000,
+        },
       ) as List<dynamic>;
+
       for (final it in items) {
         final plRaw = it['pricelist_id'];
         final plId = plRaw is List ? (plRaw[0] as int) : (plRaw as int? ?? 0);
-        final channel = idToChannel[plId];
-        if (channel == null) continue;
         final price = ((it['fixed_price'] as num?) ?? 0).toInt();
         final prodRaw = it['product_id'];
         final tmplRaw = it['product_tmpl_id'];
+
         if (prodRaw is List && prodRaw.isNotEmpty) {
-          map[channel]![prodRaw[0] as int] = price;
+          final pid = prodRaw[0] as int;
+          map[plId]?[pid] = price;
         } else if (tmplRaw is List && tmplRaw.isNotEmpty) {
-          map[channel]![tmplRaw[0] as int] = price;
+          final tid = tmplRaw[0] as int;
+          map[plId]?[tid] = price;
         }
       }
     } catch (e) {
@@ -684,6 +708,9 @@ class OdooClient {
 
     if (allowedCatIds.isNotEmpty) {
       domain.add(['id', 'in', allowedCatIds]);
+    } else if (profile.companyId == 1) {
+      // Hard safeguard: Never include PAJ drink categories in Arawali
+      domain.add(['id', '=', 5]); // Category 5 is 'Arawali Store'
     }
 
     final result = await executeKw(
@@ -699,7 +726,9 @@ class OdooClient {
     final map = <int, String>{};
     for (final row in result) {
       final name = (row['name'] as String).trim();
-      map[row['id'] as int] = name;
+      if (!isCategoryExcluded(name, profile.companyId)) {
+        map[row['id'] as int] = name;
+      }
     }
     return map;
   }
@@ -719,22 +748,33 @@ class OdooClient {
     }
 
     final categories = <String>[];
-    final nonZeroCats = categoryCounts.keys.toList();
-    nonZeroCats.sort();
+    final nonZeroCats = categoryCounts.keys
+        .where((c) => !isCategoryExcluded(c, profile.companyId))
+        .toList();
+
+    nonZeroCats.sort((a, b) {
+      if (profile.isFnb) {
+        final pA = categorySortPriority(a);
+        final pB = categorySortPriority(b);
+        if (pA != pB) return pA.compareTo(pB);
+      }
+      return a.compareTo(b);
+    });
+
     for (final c in nonZeroCats) {
-      if (c != 'Semua' && c != 'All' && !categories.contains(c)) {
+      if (c != 'Semua' && c != 'Arawali Store' && !categories.contains(c)) {
         categories.add(c);
       }
     }
     return categories;
   }
 
-  // Fetch Live Available POS Products with Real Category Assignments & Kit Detection
+  // Fetch Live Available POS Products with Real Category Assignments, Kit Detection & Channel Pricing
   Future<List<JuiceProduct>> fetchPosProducts() async {
     final catMap = await fetchCategoryMap();
     final pricelists = await fetchPricelistMaps();
-    final grabMap = pricelists['grab'] ?? {};
-    final shopeeMap = pricelists['shopee'] ?? {};
+    final grabMap = pricelists[15] ?? {};
+    final shopeeMap = pricelists[16] ?? {};
 
     // Check phantom / kit BOMs so we do not show stock for kits
     final kitProductIds = <int>{};
@@ -765,10 +805,12 @@ class OdooClient {
     try {
       final tmplDomain = <dynamic>[
         ['image_128', '!=', false],
-        ['company_id', 'in', [false, profile.companyId]],
       ];
-      if (catMap.isNotEmpty) {
-        tmplDomain.add(['pos_categ_ids', 'in', catMap.keys.toList()]);
+      if (profile.companyId == 1) {
+        tmplDomain.add(['company_id', 'in', [false, 1]]);
+        tmplDomain.add(['pos_categ_ids', 'in', [5]]);
+      } else {
+        tmplDomain.add(['company_id', 'in', [false, profile.companyId]]);
       }
       final idsWithImg = await executeKw(
         'product.template',
@@ -786,10 +828,14 @@ class OdooClient {
     final productDomain = <dynamic>[
       ['available_in_pos', '=', true],
       ['name', 'not ilike', 'ARCHIVED'],
-      ['company_id', 'in', [false, profile.companyId]],
     ];
-    if (catMap.isNotEmpty) {
-      productDomain.add(['pos_categ_ids', 'in', catMap.keys.toList()]);
+
+    if (profile.companyId == 1) {
+      // Strictly Arawali products only: NO PAJ products, NO juices, NO shared unassigned items
+      productDomain.add(['company_id', '=', 1]);
+      productDomain.add(['pos_categ_ids', 'in', [5]]);
+    } else {
+      productDomain.add(['company_id', 'in', [false, profile.companyId]]);
     }
 
     final result = await executeKw(
@@ -839,20 +885,25 @@ class OdooClient {
       String? category;
       for (final cid in categIds) {
         if (catMap.containsKey(cid)) {
-          category = catMap[cid];
-          break;
+          final cname = catMap[cid]!;
+          if (!isCategoryExcluded(cname, profile.companyId)) {
+            category = cname;
+            break;
+          }
         }
       }
 
-      category ??= (catMap.isNotEmpty ? catMap.values.first : 'General');
+      if (profile.isFnb && category == null) {
+        continue;
+      }
+      category ??= (profile.companyId == 1 ? 'Arawali Store' : 'Semua');
 
       final lowerCat = category.toLowerCase();
       final requiresModifier = profile.isFnb &&
-          (lowerCat.contains('juice') ||
-              lowerCat.contains('drink') ||
-              lowerCat.contains('smoothie') ||
-              lowerCat.contains('coffee') ||
-              lowerCat.contains('tea'));
+          (lowerCat.contains('jus') ||
+              lowerCat.contains('juice') ||
+              lowerCat.contains('protein') ||
+              lowerCat.contains('smoothie'));
 
       products.add(JuiceProduct(
         id: id,
@@ -861,11 +912,12 @@ class OdooClient {
         category: category,
         barcode: barcode,
         defaultCode: defaultCode,
+        stock: qtyAvailable?.toInt() ?? 0,
         uomName: uomName,
         qtyAvailable: qtyAvailable,
         isKit: isKit,
-        icon: profile.isFnb ? Icons.local_cafe_outlined : Icons.shopping_basket_outlined,
-        themeColor: profile.isFnb ? const Color(0xFFFB8C00) : const Color(0xFF1E88E5),
+        icon: profile.isRetail ? Icons.shopping_basket_outlined : _mapProductIcon(name),
+        themeColor: profile.isRetail ? const Color(0xFF1E88E5) : _mapProductColor(name),
         requiresModifier: requiresModifier,
         grabPrice: grabPrice,
         shopeePrice: shopeePrice,
@@ -879,31 +931,51 @@ class OdooClient {
 
   // Fetch Live Add-ons
   Future<List<AddOnOption>> fetchAddOns() async {
-    final result = await executeKw(
-      'product.product',
-      'search_read',
-      [
+    try {
+      final result = await executeKw(
+        'product.product',
+        'search_read',
         [
-          ['available_in_pos', '=', true],
-          '|',
-          ['name', 'ilike', 'ads'],
-          ['name', 'ilike', 'WHEY'],
-        ]
-      ],
-      {
-        'fields': ['id', 'name', 'list_price'],
-      },
-    ) as List<dynamic>;
+          [
+            ['available_in_pos', '=', true],
+            '|', '|', '|', '|', '|', '|', '|',
+            ['id', 'in', [4774, 4927, 4929, 4928, 4833, 4846, 4893, 4918]],
+            ['name', 'ilike', 'Extra buah'],
+            ['name', 'ilike', 'Extra butter'],
+            ['name', 'ilike', 'WHEY PROTEIN'],
+            ['name', 'ilike', 'KURMA MEDJOOL'],
+            ['name', 'ilike', 'Ganti susu low fat'],
+            ['name', 'ilike', 'KALE ads'],
+            ['name', 'ilike', 'BIT ads'],
+          ]
+        ],
+        {
+          'fields': ['id', 'name', 'list_price'],
+        },
+      ) as List<dynamic>;
 
-    final addons = <AddOnOption>[];
-    for (final row in result) {
-      final id = row['id'].toString();
-      final name = (row['name'] as String).trim();
-      final price = ((row['list_price'] as num?) ?? 0).toInt();
+      final addons = <AddOnOption>[];
+      for (final row in result) {
+        final id = row['id'].toString();
+        String name = (row['name'] as String).trim();
+        name = name.replaceAll(RegExp(r'\s+ads\.?$', caseSensitive: false), '').trim();
+        final price = ((row['list_price'] as num?) ?? 0).toInt();
 
-      addons.add(AddOnOption(id: id, name: name, extraPrice: price));
-    }
-    return addons;
+        addons.add(AddOnOption(id: id, name: name, extraPrice: price));
+      }
+      if (addons.isNotEmpty) return addons;
+    } catch (_) {}
+
+    return const [
+      AddOnOption(id: '4774', name: 'BIT', extraPrice: 5000),
+      AddOnOption(id: '4927', name: 'Extra Buah', extraPrice: 5000),
+      AddOnOption(id: '4929', name: 'Extra Butter', extraPrice: 2000),
+      AddOnOption(id: '4928', name: 'Ganti Susu Low Fat', extraPrice: 5000),
+      AddOnOption(id: '4833', name: 'KALE', extraPrice: 4000),
+      AddOnOption(id: '4846', name: 'KURMA MEDJOOL', extraPrice: 5000),
+      AddOnOption(id: '4893', name: 'SELEDRI', extraPrice: 5000),
+      AddOnOption(id: '4918', name: 'WHEY PROTEIN', extraPrice: 8000),
+    ];
   }
 
   // Live Customer Search with Odoo 19 Loyalty Points
@@ -982,6 +1054,63 @@ class OdooClient {
   Future<Customer?> searchCustomerByPhone(String phone) async {
     final list = await searchCustomers(phone);
     return list.isNotEmpty ? list.first : null;
+  }
+
+  /// Create a new customer (res.partner) in Odoo 19
+  Future<Customer> createCustomer({
+    required String name,
+    required String phone,
+    String? street,
+    String? city,
+  }) async {
+    final cleanName = name.trim();
+    final cleanPhone = phone.trim();
+    if (cleanName.isEmpty) {
+      throw ArgumentError('Nama member tidak boleh kosong');
+    }
+    if (cleanPhone.isEmpty) {
+      throw ArgumentError('Nomor HP/WhatsApp tidak boleh kosong');
+    }
+
+    try {
+      final partnerValues = <String, dynamic>{
+        'name': cleanName,
+        'phone': cleanPhone,
+        'customer_rank': 1,
+        'is_company': false,
+        'company_id': profile.companyId,
+      };
+
+      if (street != null && street.trim().isNotEmpty) {
+        partnerValues['street'] = street.trim();
+      }
+      if (city != null && city.trim().isNotEmpty) {
+        partnerValues['city'] = city.trim();
+      }
+
+      final res = await executeKw(
+        'res.partner',
+        'create',
+        [partnerValues],
+        {},
+      );
+
+      final newId = res is int ? res : (res is List ? res.first as int : 0);
+      if (newId <= 0) {
+        throw Exception('Gagal membuat member di Odoo: respons ID tidak valid ($res)');
+      }
+
+      return Customer(
+        id: newId,
+        name: cleanName,
+        phone: cleanPhone,
+        tier: 'Member',
+        points: 0.0,
+      );
+    } catch (e) {
+      debugPrint('createCustomer error: $e');
+      rethrow;
+    }
   }
 
   // Fetch Order History from Odoo
@@ -1107,6 +1236,10 @@ class OdooClient {
           ? item.originalUnitPrice.toDouble()
           : item.unitPrice.toDouble();
 
+      final lineSubtotal = effDiscount > 0
+          ? (item.originalUnitPrice * item.quantity * (1.0 - effDiscount / 100.0)).roundToDouble()
+          : item.lineTotal.toDouble();
+
       orderLines.add([
         0,
         0,
@@ -1116,50 +1249,44 @@ class OdooClient {
           'full_product_name': item.product.name,
           'qty': item.quantity,
           'price_unit': priceUnit,
-          'price_subtotal': item.lineTotal.toDouble(),
-          'price_subtotal_incl': item.lineTotal.toDouble(),
+          'price_subtotal': lineSubtotal,
+          'price_subtotal_incl': lineSubtotal,
           'discount': effDiscount,
           'customer_note': lineNoteParts.join(' | '),
         }
       ]);
     }
 
-    // Dynamically resolve discount product ID if fixed discount or loyalty points are used
-    int? discountProductId;
-    if ((orderDiscountAmount > 0 && orderDiscountPercent == 0) || pointsDiscount > 0) {
-      discountProductId = await _resolveDiscountProductId(items);
-    }
-
     // Fixed amount discount line if percentage was not used
-    if (orderDiscountAmount > 0 && orderDiscountPercent == 0 && discountProductId != null) {
+    if (orderDiscountAmount > 0 && orderDiscountPercent == 0) {
       orderLines.add([
         0,
         0,
         {
           'uuid': _uuid.v4(),
-          'product_id': discountProductId,
+          'product_id': 3820, // LOYALTY DISCOUNT / DISCOUNT product in Odoo 19
           'qty': 1,
           'price_unit': -orderDiscountAmount.toDouble(),
           'price_subtotal': -orderDiscountAmount.toDouble(),
           'price_subtotal_incl': -orderDiscountAmount.toDouble(),
-          'customer_note': 'Cart Discount',
+          'customer_note': 'Diskon Keranjang',
         }
       ]);
     }
 
     // Loyalty points redemption line
-    if (pointsDiscount > 0 && discountProductId != null) {
+    if (pointsDiscount > 0) {
       orderLines.add([
         0,
         0,
         {
           'uuid': _uuid.v4(),
-          'product_id': discountProductId,
+          'product_id': 3820, // LOYALTY DISCOUNT product in Odoo 19
           'qty': 1,
           'price_unit': -pointsDiscount.toDouble(),
           'price_subtotal': -pointsDiscount.toDouble(),
           'price_subtotal_incl': -pointsDiscount.toDouble(),
-          'customer_note': 'Loyalty Points Redemption (${redeemedPoints > 0 ? redeemedPoints : pointsDiscount} Pts)',
+          'customer_note': 'Tukar Poin Olsera Legacy (${redeemedPoints > 0 ? redeemedPoints : pointsDiscount} Pts)',
         }
       ]);
     }
@@ -1225,8 +1352,8 @@ class OdooClient {
         final cards = await executeKw(
           'loyalty.card',
           'search_read',
-          [[['partner_id', '=', partnerId]]],
-          {'fields': ['id', 'points'], 'order': 'points desc', 'limit': 1},
+          [[['partner_id', '=', partnerId], ['program_id', '=', 3]]],
+          {'fields': ['id', 'points'], 'limit': 1},
         ) as List<dynamic>;
         if (cards.isNotEmpty) {
           final cardId = cards[0]['id'] as int;
@@ -1241,51 +1368,6 @@ class OdooClient {
     }
 
     return PosOrderSubmissionResult.fromSyncResult(result);
-  }
-
-  int? _cachedDiscountProductId;
-
-  Future<int?> _resolveDiscountProductId(List<CartItem> items) async {
-    if (_cachedDiscountProductId != null) return _cachedDiscountProductId;
-    try {
-      // 1. Check pos.config discount_product_id
-      final configs = await executeKw(
-        'pos.config',
-        'read',
-        [[profile.posConfigId]],
-        {'fields': ['discount_product_id']},
-      ) as List<dynamic>;
-      if (configs.isNotEmpty) {
-        final dp = (configs.first as Map<String, dynamic>)['discount_product_id'];
-        if (dp is List && dp.isNotEmpty && dp[0] is int) {
-          _cachedDiscountProductId = dp[0] as int;
-          return _cachedDiscountProductId;
-        }
-      }
-    } catch (_) {}
-
-    try {
-      // 2. Search for a product named Discount / Diskon / Loyalty available in POS
-      final prods = await executeKw(
-        'product.product',
-        'search_read',
-        [[
-          ['available_in_pos', '=', true],
-          '|', '|',
-          ['name', 'ilike', 'Discount'],
-          ['name', 'ilike', 'Diskon'],
-          ['name', 'ilike', 'Loyalty'],
-        ]],
-        {'fields': ['id'], 'limit': 1},
-      ) as List<dynamic>;
-      if (prods.isNotEmpty) {
-        _cachedDiscountProductId = (prods.first as Map<String, dynamic>)['id'] as int;
-        return _cachedDiscountProductId;
-      }
-    } catch (_) {}
-
-    // 3. Fallback to first cart item product_id so sync_from_ui never fails on foreign key
-    return items.isNotEmpty ? items.first.product.id : null;
   }
 
   // Submit Cash In / Cash Out drawer move directly to Odoo 19 pos.session
@@ -1318,6 +1400,37 @@ class OdooClient {
       partnerId ?? false,
       extras,
     ]);
+  }
+
+  IconData _mapProductIcon(String name) {
+    final lower = name.toLowerCase();
+    if (lower.contains('apel')) return Icons.apple_rounded;
+    if (lower.contains('jeruk') || lower.contains('lemon')) return Icons.circle;
+    if (lower.contains('alpukat')) return Icons.eco_rounded;
+    if (lower.contains('naga')) return Icons.flare_rounded;
+    if (lower.contains('wortel')) return Icons.grass_rounded;
+    if (lower.contains('melon')) return Icons.radio_button_checked;
+    if (lower.contains('semangka')) return Icons.water_drop_rounded;
+    if (lower.contains('roti') || lower.contains('bun') || lower.contains('cake') || lower.contains('roll')) {
+      return Icons.bakery_dining_rounded;
+    }
+    if (lower.contains('coffee') || lower.contains('kopi')) return Icons.coffee_rounded;
+    return Icons.local_drink_rounded;
+  }
+
+  Color _mapProductColor(String name) {
+    final lower = name.toLowerCase();
+    if (lower.contains('apel')) return Colors.red;
+    if (lower.contains('jeruk')) return Colors.orange;
+    if (lower.contains('alpukat')) return Colors.green;
+    if (lower.contains('naga')) return Colors.purple;
+    if (lower.contains('wortel')) return Colors.deepOrange;
+    if (lower.contains('melon')) return Colors.lightGreen;
+    if (lower.contains('semangka')) return Colors.pink;
+    if (lower.contains('roti') || lower.contains('bun') || lower.contains('cake') || lower.contains('roll')) {
+      return Colors.brown;
+    }
+    return Colors.amber;
   }
 }
 

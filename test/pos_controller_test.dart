@@ -240,6 +240,37 @@ void main() {
       expect(controller.totalLineDiscounts, 0);
       expect(controller.subtotal, 40000);
     });
+
+    test('Calculates exact line total for odd unit price discounts without per-unit rounding divergence', () {
+      // ULTRA MILK: Rp 21.990 x 4 with 15% discount
+      // Unrounded: 21990 * 4 * 0.85 = 74766.0
+      // Pre-rounded per-unit was: round(18691.5) * 4 = 18692 * 4 = 74768 (+2 error)
+      const milk = JuiceProduct(id: 3192, name: 'Ultra Milk', price: 21990, category: 'Milk');
+      controller.addProductDirectly(milk, 4);
+      final milkLineId = controller.cartItems.last.lineId;
+      controller.applyLineDiscount(milkLineId, 15.0);
+
+      expect(controller.cartItems.last.lineTotal, 74766);
+      expect(controller.cartItems.last.originalUnitPrice, 21990);
+      // Unit price for display is round(18691.5) = 18692
+      expect(controller.cartItems.last.unitPrice, 18692);
+
+      // GULA PASIR: Rp 18.990 x 9 with 15% discount
+      // Unrounded: 18990 * 9 * 0.85 = 145273.5 -> 145274
+      // Pre-rounded per-unit was: round(16141.5) * 9 = 16142 * 9 = 145278 (+4 error)
+      const sugar = JuiceProduct(id: 3805, name: 'Gula Pasir', price: 18990, category: 'Sugar');
+      controller.addProductDirectly(sugar, 9);
+      final sugarLineId = controller.cartItems.last.lineId;
+      controller.applyLineDiscount(sugarLineId, 15.0);
+
+      expect(controller.cartItems.last.lineTotal, 145274);
+      expect(controller.cartItems.last.originalUnitPrice, 18990);
+      expect(controller.cartItems.last.unitPrice, 16142);
+
+      // Total of both should be exactly 74766 + 145274 = 220040 (Odoo exact math)
+      expect(controller.cartItems[0].lineTotal + controller.cartItems[1].lineTotal, 220040);
+      expect(controller.subtotal, 220040);
+    });
   });
 }
 

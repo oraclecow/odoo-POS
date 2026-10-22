@@ -45,12 +45,12 @@ class OdooJuicePosApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Open Odoo POS',
+      title: 'AraPOS',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         useMaterial3: true,
         colorScheme: ColorScheme.fromSeed(
-          seedColor: AppColors.brandRed,
+          seedColor: AppColors.arawaliRed,
           primary: AppColors.deepSlate,
           secondary: AppColors.sunYellow,
           surface: Colors.white,

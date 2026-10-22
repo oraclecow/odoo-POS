@@ -2,8 +2,10 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../../data/models/customer.dart';
+import '../../data/models/juice_product.dart';
 import '../../data/repositories/juice_pos_repository.dart';
 import '../../logic/pos_controller.dart';
+import '../../modules/pos_members/member_registration_dialog.dart';
 import '../core/app_colors.dart';
 
 class CustomerKeypadDialog extends StatefulWidget {
@@ -124,6 +126,21 @@ class _CustomerKeypadDialogState extends State<CustomerKeypadDialog> with Single
     widget.posController?.clearRedeemedPoints();
   }
 
+  Future<void> _openMemberRegistrationDialog([String? query]) async {
+    final newMember = await MemberRegistrationDialog.show(
+      context,
+      repository: widget.repository,
+      initialQuery: query ?? _searchController.text.trim(),
+      onMemberRegistered: (c) {
+        _selectCustomer(c);
+      },
+    );
+
+    if (newMember != null && mounted) {
+      Navigator.of(context).pop();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Dialog(
@@ -146,10 +163,10 @@ class _CustomerKeypadDialogState extends State<CustomerKeypadDialog> with Single
                       Container(
                         padding: const EdgeInsets.all(8),
                         decoration: BoxDecoration(
-                          color: AppColors.brandRed.withOpacity(0.12),
+                          color: AppColors.arawaliRed.withOpacity(0.12),
                           borderRadius: BorderRadius.circular(10),
                         ),
-                        child: const Icon(Icons.card_membership_rounded, color: AppColors.brandRed, size: 22),
+                        child: const Icon(Icons.card_membership_rounded, color: AppColors.arawaliRed, size: 22),
                       ),
                       const SizedBox(width: 10),
                       Column(
@@ -281,64 +298,83 @@ class _CustomerKeypadDialogState extends State<CustomerKeypadDialog> with Single
                   ),
                 ),
                 TextButton.icon(
-                  icon: const Icon(Icons.link_off_rounded, size: 16, color: AppColors.brandRed),
-                  label: const Text('Lepas', style: TextStyle(color: AppColors.brandRed, fontWeight: FontWeight.bold)),
+                  icon: const Icon(Icons.link_off_rounded, size: 16, color: AppColors.arawaliRed),
+                  label: const Text('Lepas', style: TextStyle(color: AppColors.arawaliRed, fontWeight: FontWeight.bold)),
                   onPressed: _clearCustomer,
                 ),
               ],
             ),
           ),
 
-        // Search Input Bar
-        Container(
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: AppColors.borderDark, width: 1.5),
-          ),
-          child: Row(
-            children: [
-              const Padding(
-                padding: EdgeInsets.symmetric(horizontal: 12.0),
-                child: Icon(Icons.search_rounded, color: AppColors.brandRed, size: 22),
-              ),
-              Expanded(
-                child: TextField(
-                  controller: _searchController,
-                  focusNode: _searchFocusNode,
-                  style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
-                  decoration: const InputDecoration(
-                    hintText: 'Ketik nama member atau nomor HP (cth: 0823 atau Budi)...',
-                    hintStyle: TextStyle(fontSize: 12.5, color: AppColors.textSecondary),
-                    border: InputBorder.none,
-                    contentPadding: EdgeInsets.symmetric(vertical: 12),
-                  ),
-                  onChanged: (val) {
-                    _onSearchChanged(val);
-                    setState(() {});
-                  },
+        // Search Input Bar & Quick Registration
+        Row(
+          children: [
+            Expanded(
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: AppColors.borderDark, width: 1.5),
+                ),
+                child: Row(
+                  children: [
+                    const Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 12.0),
+                      child: Icon(Icons.search_rounded, color: AppColors.arawaliRed, size: 22),
+                    ),
+                    Expanded(
+                      child: TextField(
+                        controller: _searchController,
+                        focusNode: _searchFocusNode,
+                        style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+                        decoration: const InputDecoration(
+                          hintText: 'Ketik nama member atau nomor HP (cth: 0823 atau Budi)...',
+                          hintStyle: TextStyle(fontSize: 12.5, color: AppColors.textSecondary),
+                          border: InputBorder.none,
+                          contentPadding: EdgeInsets.symmetric(vertical: 12),
+                        ),
+                        onChanged: (val) {
+                          _onSearchChanged(val);
+                          setState(() {});
+                        },
+                      ),
+                    ),
+                    if (_searchController.text.isNotEmpty)
+                      IconButton(
+                        icon: const Icon(Icons.clear_rounded, size: 18),
+                        onPressed: () {
+                          _searchController.clear();
+                          _onSearchChanged('');
+                          setState(() {});
+                        },
+                      ),
+                    IconButton(
+                      icon: Icon(
+                        _showNumpad ? Icons.keyboard_rounded : Icons.dialpad_rounded,
+                        color: _showNumpad ? AppColors.arawaliRed : Colors.grey.shade600,
+                        size: 20,
+                      ),
+                      tooltip: _showNumpad ? 'Tutup Touch Numpad' : 'Buka Touch Numpad',
+                      onPressed: () => setState(() => _showNumpad = !_showNumpad),
+                    ),
+                  ],
                 ),
               ),
-              if (_searchController.text.isNotEmpty)
-                IconButton(
-                  icon: const Icon(Icons.clear_rounded, size: 18),
-                  onPressed: () {
-                    _searchController.clear();
-                    _onSearchChanged('');
-                    setState(() {});
-                  },
-                ),
-              IconButton(
-                icon: Icon(
-                  _showNumpad ? Icons.keyboard_rounded : Icons.dialpad_rounded,
-                  color: _showNumpad ? AppColors.brandRed : Colors.grey.shade600,
-                  size: 20,
-                ),
-                tooltip: _showNumpad ? 'Tutup Touch Numpad' : 'Buka Touch Numpad',
-                onPressed: () => setState(() => _showNumpad = !_showNumpad),
+            ),
+            const SizedBox(width: 8),
+            ElevatedButton.icon(
+              icon: const Icon(Icons.person_add_alt_1_rounded, size: 18),
+              label: const Text('+ Member Baru', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF059669),
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                elevation: 1,
               ),
-            ],
-          ),
+              onPressed: () => _openMemberRegistrationDialog(_searchController.text.trim()),
+            ),
+          ],
         ),
         const SizedBox(height: 8),
 
@@ -362,24 +398,42 @@ class _CustomerKeypadDialogState extends State<CustomerKeypadDialog> with Single
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            Icon(Icons.person_search_rounded, size: 44, color: Colors.grey.shade400),
+                            Icon(Icons.person_search_rounded, size: 48, color: Colors.grey.shade400),
                             const SizedBox(height: 8),
                             Text(
                               _searchController.text.trim().isEmpty
                                   ? 'Ketik nama atau nomor HP member di atas.'
-                                  : 'Member "${_searchController.text.trim()}" tidak ditemukan.',
+                                  : 'Member "${_searchController.text.trim()}" belum terdaftar.',
                               textAlign: TextAlign.center,
-                              style: const TextStyle(fontSize: 13, color: AppColors.textSecondary),
+                              style: const TextStyle(fontSize: 13.5, color: AppColors.textSecondary, fontWeight: FontWeight.w600),
+                            ),
+                            const SizedBox(height: 14),
+                            ElevatedButton.icon(
+                              icon: const Icon(Icons.person_add_alt_1_rounded, size: 18),
+                              label: Text(
+                                _searchController.text.trim().isNotEmpty
+                                    ? 'Daftarkan Sebagai Member Baru: "${_searchController.text.trim()}"'
+                                    : 'Daftarkan Member Baru',
+                                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                              ),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: const Color(0xFF059669),
+                                foregroundColor: Colors.white,
+                                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                              ),
+                              onPressed: () => _openMemberRegistrationDialog(_searchController.text.trim()),
                             ),
                             if (_searchController.text.trim().length >= 3) ...[
-                              const SizedBox(height: 10),
-                              ElevatedButton.icon(
-                                icon: const Icon(Icons.person_add_alt_1_rounded, size: 16),
-                                label: Text('Gunakan Sebagai Tamu: "${_searchController.text.trim()}"'),
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: AppColors.deepSlate,
-                                  foregroundColor: Colors.white,
-                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                              const SizedBox(height: 8),
+                              TextButton.icon(
+                                icon: const Icon(Icons.person_outline_rounded, size: 15),
+                                label: Text(
+                                  'Gunakan Sebagai Tamu Sementara: "${_searchController.text.trim()}"',
+                                  style: const TextStyle(fontSize: 12),
+                                ),
+                                style: TextButton.styleFrom(
+                                  foregroundColor: AppColors.textSecondary,
                                 ),
                                 onPressed: () {
                                   final guest = Customer(
@@ -664,7 +718,7 @@ class _CustomerKeypadDialogState extends State<CustomerKeypadDialog> with Single
                       icon: const Icon(Icons.flash_on_rounded, size: 14),
                       label: Text('Tukar Maksimal ($maxRedeemable Pts)'),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.brandOrange,
+                        backgroundColor: AppColors.arawaliOrange,
                         foregroundColor: Colors.white,
                         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
@@ -683,7 +737,7 @@ class _CustomerKeypadDialogState extends State<CustomerKeypadDialog> with Single
           children: [
             const Row(
               children: [
-                Icon(Icons.card_giftcard_rounded, size: 16, color: AppColors.brandRed),
+                Icon(Icons.card_giftcard_rounded, size: 16, color: AppColors.arawaliRed),
                 SizedBox(width: 6),
                 Text(
                   'Menu & Produk yang Bisa Ditukar Poin',

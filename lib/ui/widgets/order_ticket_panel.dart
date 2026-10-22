@@ -329,7 +329,7 @@ class OrderTicketPanel extends ConsumerWidget {
                   child: Opacity(
                     opacity: 0.12,
                     child: Image.asset(
-                      'assets/images/store_logo.png',
+                      controller.businessMode.isFnb ? 'assets/images/paj_logo.png' : 'assets/images/arawali_logo.png',
                       width: 200,
                       fit: BoxFit.contain,
                     ),
@@ -380,7 +380,7 @@ class OrderTicketPanel extends ConsumerWidget {
                                 border: Border.all(
                                   color: isReturn
                                       ? Colors.redAccent.shade400
-                                      : (hasDiscount ? AppColors.brandOrange.withOpacity(0.7) : AppColors.cartRowBorder),
+                                      : (hasDiscount ? AppColors.arawaliOrange.withOpacity(0.7) : AppColors.cartRowBorder),
                                   width: 1.5,
                                 ),
                                 boxShadow: const [
@@ -428,7 +428,7 @@ class OrderTicketPanel extends ConsumerWidget {
                                           const SizedBox(height: 2),
                                           Text(
                                             item.modifiers.summaryDescription,
-                                            style: const TextStyle(fontSize: 11.5, color: AppColors.brandOrange, fontWeight: FontWeight.w700, height: 1.2),
+                                            style: const TextStyle(fontSize: 11.5, color: AppColors.arawaliOrange, fontWeight: FontWeight.w700, height: 1.2),
                                           ),
                                         ],
                                         if (item.note != null && item.note!.isNotEmpty) ...[
@@ -459,7 +459,7 @@ class OrderTicketPanel extends ConsumerWidget {
                                                 fontWeight: FontWeight.w800,
                                                 color: isReturn
                                                     ? Colors.redAccent.shade100
-                                                    : (hasDiscount ? AppColors.brandOrange : AppColors.sunYellow),
+                                                    : (hasDiscount ? AppColors.arawaliOrange : AppColors.sunYellow),
                                               ),
                                             ),
                                             if (hasDiscount) ...[
@@ -467,16 +467,16 @@ class OrderTicketPanel extends ConsumerWidget {
                                               Container(
                                                 padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1.5),
                                                 decoration: BoxDecoration(
-                                                  color: AppColors.brandOrange.withOpacity(0.2),
+                                                  color: AppColors.arawaliOrange.withOpacity(0.2),
                                                   borderRadius: BorderRadius.circular(4),
-                                                  border: Border.all(color: AppColors.brandOrange, width: 1),
+                                                  border: Border.all(color: AppColors.arawaliOrange, width: 1),
                                                 ),
                                                 child: Text(
                                                   '-${item.discountPercent!.toStringAsFixed(0)}%',
                                                   style: const TextStyle(
                                                     fontSize: 10,
                                                     fontWeight: FontWeight.w900,
-                                                    color: AppColors.brandOrange,
+                                                    color: AppColors.arawaliOrange,
                                                   ),
                                                 ),
                                               ),
@@ -522,6 +522,8 @@ class OrderTicketPanel extends ConsumerWidget {
                                               unitPrice: item.unitPrice,
                                               initialQuantity: item.quantity,
                                               sku: item.product.defaultCode,
+                                              originalUnitPrice: item.originalUnitPrice,
+                                              discountPercent: item.discountPercent,
                                             );
                                             if (newQty != null) {
                                               controller.setLineQuantity(item.lineId, newQty);
@@ -697,11 +699,11 @@ class OrderTicketPanel extends ConsumerWidget {
                     children: [
                       const Text(
                         'Hemat Diskon Item:',
-                        style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.w700, color: AppColors.brandOrange),
+                        style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.w700, color: AppColors.arawaliOrange),
                       ),
                       Text(
                         '-${currency.format(controller.totalLineDiscounts)}',
-                        style: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.w800, color: AppColors.brandOrange),
+                        style: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.w800, color: AppColors.arawaliOrange),
                       ),
                     ],
                   ),
@@ -713,11 +715,11 @@ class OrderTicketPanel extends ConsumerWidget {
                     children: [
                       Text(
                         'Diskon ${controller.orderDiscountPercent > 0 ? '(${controller.orderDiscountPercent.toStringAsFixed(0)}%)' : ''}:',
-                        style: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.w700, color: AppColors.brandOrange),
+                        style: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.w700, color: AppColors.arawaliOrange),
                       ),
                       Text(
                         '-${currency.format(controller.orderDiscountTotal)}',
-                        style: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.w800, color: AppColors.brandOrange),
+                        style: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.w800, color: AppColors.arawaliOrange),
                       ),
                     ],
                   ),
@@ -816,6 +818,7 @@ class OrderTicketPanel extends ConsumerWidget {
                               final completedChannelName = controller.channel.cleanDisplayName;
                               final completedNote = controller.orderNote;
                               final enableKitchenSlip = controller.guardrails.enableKitchenSlip;
+                              final isFnbMode = controller.businessMode.isFnb;
                               final savedOrderNum = controller.orderNumber;
                               final cashierName = controller.activeCashier?.name ?? 'Staff';
                               final finalMethod = paymentResult.paymentMethod;
@@ -839,7 +842,7 @@ class OrderTicketPanel extends ConsumerWidget {
                                   title: Row(
                                     children: [
                                       Image.asset(
-                                        'assets/images/store_logo.png',
+                                        isFnbMode ? 'assets/images/paj_logo.png' : 'assets/images/arawali_logo.png',
                                         height: 38,
                                         fit: BoxFit.contain,
                                       ),
@@ -850,7 +853,7 @@ class OrderTicketPanel extends ConsumerWidget {
                                           Text(completedTotal < 0 ? 'Refund Successful!' : 'Order Successful!',
                                               style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                                           Text(
-                                            'OPEN ODOO POS',
+                                            isFnbMode ? 'PICK A JUICE POS' : 'ARAWALI STORE POS',
                                             style: const TextStyle(fontSize: 11, color: AppColors.primaryRed, fontWeight: FontWeight.bold),
                                           ),
                                         ],
@@ -913,8 +916,6 @@ class OrderTicketPanel extends ConsumerWidget {
                                           cashierName: cashierName,
                                           storeName: odooClient.profile.displayName.replaceAll(RegExp(r'\(.*?\)'), '').trim(),
                                           companyId: odooClient.profile.companyId,
-                                          customHeader: odooClient.profile.receiptHeader,
-                                          customFooter: odooClient.profile.receiptFooter,
                                         );
                                         if (context.mounted) {
                                           ScaffoldMessenger.of(context).showSnackBar(
@@ -1000,8 +1001,6 @@ class OrderTicketPanel extends ConsumerWidget {
                                       cashierName: cashierName,
                                       storeName: odooClient.profile.displayName.replaceAll(RegExp(r'\(.*?\)'), '').trim(),
                                       companyId: odooClient.profile.companyId,
-                                          customHeader: odooClient.profile.receiptHeader,
-                                          customFooter: odooClient.profile.receiptFooter,
                                     );
                                   }
 

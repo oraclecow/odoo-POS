@@ -63,7 +63,7 @@ class PosFloatingOrder {
   int get totalLineDiscounts {
     return items.fold(
       0,
-      (sum, item) => sum + ((item.originalUnitPrice - item.unitPrice) * item.quantity),
+      (sum, item) => sum + ((item.originalUnitPrice * item.quantity) - item.lineTotal),
     );
   }
 

@@ -63,7 +63,7 @@ class AppUpdateService {
       if (kIsWeb) {
         targetUri = Uri.base.resolve('/version.json');
       } else {
-        String base = serverBaseUrl ?? 'http://localhost:8089';
+        String base = serverBaseUrl ?? 'http://192.168.200.196:8089';
         if (base.contains(':8069')) {
           final host = Uri.parse(base).host;
           base = 'http://$host:8089';
@@ -127,7 +127,7 @@ class AppUpdateService {
   }
 
   /// Trigger browser download of APK file
-  static void downloadApkWeb({String filename = 'open-odoo-pos.apk', String path = '/app-release.apk'}) {
+  static void downloadApkWeb({String filename = 'PAJ-POS.apk', String path = '/app-release.apk'}) {
     triggerWebDownload(path, filename);
   }
 }

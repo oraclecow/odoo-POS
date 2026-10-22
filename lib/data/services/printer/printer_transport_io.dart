@@ -77,7 +77,7 @@ class PrinterTransport {
         return await WindowsSpoolerPrinter.printRawBytes(
           bytes,
           printerName: printerName,
-          docName: 'POS $label',
+          docName: 'Arawali $label',
         );
       } else if (Platform.isLinux) {
         for (final path in ['/dev/usb/lp0', '/dev/usb/lp1']) {

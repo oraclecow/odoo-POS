@@ -19,7 +19,7 @@ class KitchenReceiptTemplate {
   }) {
     final doc = EscPosBuilder(cols: cols);
 
-    doc.title(config.headerTitle);
+    doc.title(config.header);
     doc.centerLine("CHANNEL: $channelName", bold: true);
     doc.doubleDivider();
 
@@ -30,11 +30,11 @@ class KitchenReceiptTemplate {
     final orderMeta = "Order: $ticketNum$refStr | ${DateFormat('HH:mm:ss').format(DateTime.now())}";
     doc.leftLine(orderMeta);
 
-    if (cashierName != null && cashierName.isNotEmpty) {
+    if (config.showCashier && cashierName != null && cashierName.isNotEmpty) {
       doc.leftLine("Cashier: $cashierName");
     }
 
-    if (config.showNotes && note != null && note.isNotEmpty) {
+    if (config.showNote && note != null && note.isNotEmpty) {
       doc.leftLine("Note: $note", bold: true);
     }
     doc.divider();

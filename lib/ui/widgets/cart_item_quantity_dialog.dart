@@ -9,6 +9,8 @@ class CartItemQuantityDialog extends StatefulWidget {
   final int unitPrice;
   final int initialQuantity;
   final String? sku;
+  final int? originalUnitPrice;
+  final double? discountPercent;
 
   const CartItemQuantityDialog({
     super.key,
@@ -16,6 +18,8 @@ class CartItemQuantityDialog extends StatefulWidget {
     required this.unitPrice,
     required this.initialQuantity,
     this.sku,
+    this.originalUnitPrice,
+    this.discountPercent,
   });
 
   static Future<int?> show(
@@ -24,6 +28,8 @@ class CartItemQuantityDialog extends StatefulWidget {
     required int unitPrice,
     required int initialQuantity,
     String? sku,
+    int? originalUnitPrice,
+    double? discountPercent,
   }) {
     return showDialog<int>(
       context: context,
@@ -33,6 +39,8 @@ class CartItemQuantityDialog extends StatefulWidget {
         unitPrice: unitPrice,
         initialQuantity: initialQuantity,
         sku: sku,
+        originalUnitPrice: originalUnitPrice,
+        discountPercent: discountPercent,
       ),
     );
   }
@@ -132,7 +140,9 @@ class _CartItemQuantityDialogState extends State<CartItemQuantityDialog> {
 
   @override
   Widget build(BuildContext context) {
-    final subtotal = widget.unitPrice * _quantity;
+    final subtotal = (widget.discountPercent != null && widget.discountPercent! > 0)
+        ? ((widget.originalUnitPrice ?? widget.unitPrice) * _quantity * (1.0 - widget.discountPercent! / 100.0)).round()
+        : widget.unitPrice * _quantity;
     final screenHeight = MediaQuery.of(context).size.height;
 
     return Focus(

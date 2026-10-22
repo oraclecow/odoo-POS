@@ -2,12 +2,14 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:open_odoo_pos/data/services/odoo_client.dart';
 
 void main() {
-  test('OdooClient initializes with default configuration', () {
+  test('OdooClient connects and fetches live products from LXC 101 Odoo 19', () async {
     final client = OdooClient();
-    expect(client.baseUrl, 'http://localhost:8069');
-    expect(client.database, 'odoo');
-    expect(client.profile.login, 'admin');
-    expect(client.profile.companyId, 1);
-    expect(client.profile.posConfigId, 1);
+    final uid = await client.authenticate();
+    expect(uid, greaterThan(0));
+
+    final products = await client.fetchPosProducts();
+    expect(products.isNotEmpty, isTrue);
+    expect(products.first.name.isNotEmpty, isTrue);
+    expect(products.first.price, greaterThanOrEqualTo(0));
   });
 }

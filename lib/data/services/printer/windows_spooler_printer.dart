@@ -103,7 +103,7 @@ class WindowsSpoolerPrinter {
   static Future<Map<String, dynamic>> printRawBytes(
     List<int> bytes, {
     String? printerName,
-    String docName = 'POS Receipt',
+    String docName = 'AraPOS Receipt',
   }) async {
     if (!Platform.isWindows) {
       return {'success': false, 'message': 'Hanya didukung di Windows'};

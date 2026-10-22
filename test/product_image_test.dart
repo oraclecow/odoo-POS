@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:open_odoo_pos/data/models/juice_product.dart';
+import 'package:open_odoo_pos/data/services/odoo_client.dart';
 import 'package:open_odoo_pos/data/repositories/juice_pos_repository.dart';
 import 'package:open_odoo_pos/logic/pos_controller.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -12,16 +13,16 @@ void main() {
     test('Product with hasImage generates correct Odoo image URL', () {
       const product = JuiceProduct(
         id: 231,
-        name: 'ESPRESSO SINGLE SHOT',
+        name: 'ALAS TART MARMER KOTAK UK 18',
         price: 15000,
-        category: 'Beverages',
+        category: 'Arawali Store',
         writeDate: '2026-10-10 01:15:00',
         productTmplId: 231,
         hasImage: true,
       );
 
       expect(product.hasImage, isTrue);
-      final url = product.getImageUrl('http://localhost:8069');
+      final url = product.getImageUrl('http://192.168.201.201:8069');
       expect(url, isNotNull);
       expect(url, contains('/web/image?model=product.product&field=image_128&id=231'));
       expect(url, contains('unique=2026-10-10%2001%3A15%3A00'));
@@ -32,20 +33,20 @@ void main() {
         id: 999,
         name: 'BARANG TANPA GAMBAR',
         price: 5000,
-        category: 'General',
+        category: 'Arawali Store',
         hasImage: false,
       );
 
       expect(product.hasImage, isFalse);
-      expect(product.getImageUrl('http://localhost:8069'), isNull);
+      expect(product.getImageUrl('http://192.168.201.201:8069'), isNull);
     });
 
     test('Relative base URL for Web proxy works cleanly', () {
       const product = JuiceProduct(
         id: 3153,
-        name: 'ICED LATTE',
+        name: 'ABC KCP MANIS',
         price: 25000,
-        category: 'Beverages',
+        category: 'Arawali Store',
         writeDate: '2026-10-12 05:22:23',
         hasImage: true,
       );
@@ -75,6 +76,26 @@ void main() {
       await controller.toggleShowProductImages(true);
       expect(controller.showProductImages, isTrue);
       expect(prefs.getBool('pos_show_product_images'), isTrue);
+    });
+  });
+
+  group('Live Odoo 19 Image Metadata Integration', () {
+    test('Live fetchPosProducts populates hasImage flag', () async {
+      final client = OdooClient();
+      final uid = await client.authenticate();
+      expect(uid, greaterThan(0));
+
+      final products = await client.fetchPosProducts();
+      expect(products.isNotEmpty, isTrue);
+
+      final productsWithImages = products.where((p) => p.hasImage).toList();
+      expect(productsWithImages.isNotEmpty, isTrue);
+      // We know from Odoo DB that ~1751 products have images
+      expect(productsWithImages.length, greaterThan(500));
+
+      // Test that an image URL can be generated for a product with image
+      final sample = productsWithImages.first;
+      expect(sample.getImageUrl('http://192.168.201.201:8069'), isNotNull);
     });
   });
 }

@@ -19,6 +19,10 @@ enum PosBusinessMode {
         return PosBusinessMode.retail;
       }
     }
+    // Auto-detect fallback based on known company IDs (1 = Arawali Retail, others = PAJ / Bakery F&B)
+    if (companyId != null && companyId != 1) {
+      return PosBusinessMode.fnb;
+    }
     return PosBusinessMode.retail;
   }
 }

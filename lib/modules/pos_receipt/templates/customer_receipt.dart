@@ -9,6 +9,18 @@ import 'odoo_original_receipt.dart';
 class CustomerReceiptTemplate {
   static final _currency = NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0);
 
+  static bool _isFnbCompany(int companyId, String storeName) {
+    final lower = storeName.toLowerCase();
+    return companyId == 6 ||
+        companyId == 2 ||
+        companyId == 7 ||
+        companyId == 3 ||
+        lower.contains('kartini') ||
+        lower.contains('pick a juice') ||
+        lower.contains('paj') ||
+        lower.contains('bakery');
+  }
+
   static EscPosDocument buildCustomerReceipt({
     required int cols,
     required bool autoCutter,
@@ -28,9 +40,7 @@ class CustomerReceiptTemplate {
     String? trackingNumber,
     Customer? customer,
     String? cashierName,
-    String storeName = 'MAIN STORE POS',
-    String? customHeader,
-    String? customFooter,
+    String storeName = 'ARAWALI',
     int companyId = 1,
   }) {
     if (config.useOdooOriginalFormat) {
@@ -60,14 +70,15 @@ class CustomerReceiptTemplate {
     final doc = EscPosBuilder(cols: cols);
     final cfg = config.customerReceipt;
     final meta = config.odooMeta;
+    final isFnb = _isFnbCompany(companyId, storeName);
 
-    final cleanStoreName = storeName.isNotEmpty ? storeName : cfg.storeName;
+    final cleanStoreName = isFnb ? cfg.fnbStoreName : cfg.storeName;
     final storeSubtitle = (config.syncHeaderFooterFromOdoo && meta.receiptHeader.isNotEmpty)
         ? meta.receiptHeader
-        : ((customHeader != null && customHeader.isNotEmpty) ? customHeader : cfg.subtitle);
+        : (isFnb ? cfg.fnbSubtitle : cfg.subtitle);
     final receiptFooter = (config.syncHeaderFooterFromOdoo && meta.receiptFooter.isNotEmpty)
         ? meta.receiptFooter
-        : ((customFooter != null && customFooter.isNotEmpty) ? customFooter : cfg.footer);
+        : (isFnb ? cfg.fnbFooter : cfg.footer);
 
     // 1. Header Block
     doc.title(cleanStoreName);
@@ -104,7 +115,7 @@ class CustomerReceiptTemplate {
       final prodTitle = isReturn ? '[RETUR] ${item.product.name}' : item.product.name;
       doc.leftLine(prodTitle);
       doc.row(
-        "  ${item.quantity} X ${_currency.format(item.unitPrice)}",
+        "  ${item.quantity} X ${_currency.format(item.originalUnitPrice)}",
         _currency.format(item.lineTotal),
       );
 
@@ -166,22 +177,21 @@ class CustomerReceiptTemplate {
     required ReceiptConfig config,
     required OdooOrderRecord order,
     List<Map<String, dynamic>>? lines,
-    String storeName = 'MAIN STORE POS',
-    String? customHeader,
-    String? customFooter,
+    String storeName = 'ARAWALI',
     int companyId = 1,
   }) {
     final doc = EscPosBuilder(cols: cols);
     final cfg = config.customerReceipt;
     final meta = config.odooMeta;
+    final isFnb = _isFnbCompany(companyId, storeName);
 
-    final cleanStoreName = storeName.isNotEmpty ? storeName : cfg.storeName;
+    final cleanStoreName = isFnb ? cfg.fnbStoreName : cfg.storeName;
     final storeSubtitle = (config.syncHeaderFooterFromOdoo && meta.receiptHeader.isNotEmpty)
         ? meta.receiptHeader
-        : ((customHeader != null && customHeader.isNotEmpty) ? customHeader : cfg.subtitle);
+        : (isFnb ? cfg.fnbSubtitle : cfg.subtitle);
     final receiptFooter = (config.syncHeaderFooterFromOdoo && meta.receiptFooter.isNotEmpty)
         ? meta.receiptFooter
-        : ((customFooter != null && customFooter.isNotEmpty) ? customFooter : cfg.footer);
+        : (isFnb ? cfg.fnbFooter : cfg.footer);
 
     // Header
     doc.title(cleanStoreName);

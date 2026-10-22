@@ -5,8 +5,8 @@ import '../../logic/pos_controller.dart';
 import '../core/app_colors.dart';
 import 'scrollable_category_bar.dart';
 import 'compact_juice_tile.dart';
-import 'juice_modifier_dialog.dart';
 import 'cart_item_quantity_dialog.dart';
+import 'juice_modifier_dialog.dart';
 
 class CatalogPanel extends ConsumerStatefulWidget {
   const CatalogPanel({super.key});
@@ -73,7 +73,7 @@ class _CatalogPanelState extends ConsumerState<CatalogPanel> {
           SnackBar(
             content: Text('Produk barcode "$query" tidak ditemukan'),
             duration: const Duration(seconds: 2),
-            backgroundColor: AppColors.brandDarkRed,
+            backgroundColor: AppColors.arawaliDarkRed,
           ),
         );
       }
@@ -120,7 +120,7 @@ class _CatalogPanelState extends ConsumerState<CatalogPanel> {
                       decoration: InputDecoration(
                         hintText: 'Scan barcode atau ketik nama produk / kode SKU...',
                         hintStyle: const TextStyle(fontSize: 13, color: AppColors.textSecondary),
-                        prefixIcon: const Icon(Icons.qr_code_scanner_rounded, size: 22, color: AppColors.brandRed),
+                        prefixIcon: const Icon(Icons.qr_code_scanner_rounded, size: 22, color: AppColors.arawaliRed),
                         suffixIcon: _searchController.text.isNotEmpty
                             ? IconButton(
                                 icon: const Icon(Icons.clear, size: 18),

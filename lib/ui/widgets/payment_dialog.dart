@@ -46,6 +46,8 @@ class _PaymentDialogState extends State<PaymentDialog> {
   bool _isSubmitting = false;
   bool _isFirstInput = true;
 
+  final _billDenominations = const [2000, 5000, 10000, 20000, 50000, 100000];
+
   @override
   void initState() {
     super.initState();
@@ -274,16 +276,16 @@ class _PaymentDialogState extends State<PaymentDialog> {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Header with store brand
+                // Header with Pick A Juice Brand
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Row(
                       children: [
-                        Image.asset('assets/images/store_logo.png', height: 32, fit: BoxFit.contain),
+                        Image.asset('assets/images/arawali_logo.png', height: 32, fit: BoxFit.contain),
                         const SizedBox(width: 10),
                         const Text(
-                          'OPEN ODOO POS CHECKOUT',
+                          'ARAWALI POS CHECKOUT',
                           style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
                         ),
                       ],

@@ -114,7 +114,7 @@ class _DiscountDialogState extends State<DiscountDialog> {
                           color: AppColors.sunYellow.withOpacity(0.2),
                           borderRadius: BorderRadius.circular(10),
                         ),
-                        child: const Icon(Icons.discount_rounded, color: AppColors.brandOrange, size: 24),
+                        child: const Icon(Icons.discount_rounded, color: AppColors.arawaliOrange, size: 24),
                       ),
                       const SizedBox(width: 10),
                       const Text(

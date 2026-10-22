@@ -6,8 +6,6 @@ class OdooCompanyProfile {
   final String password;
   final int companyId;
   final int posConfigId;
-  final String receiptHeader;
-  final String receiptFooter;
   final PosBusinessMode mode;
   final WorkerUiGuardrails guardrails;
 
@@ -17,8 +15,6 @@ class OdooCompanyProfile {
     required this.password,
     required this.companyId,
     required this.posConfigId,
-    this.receiptHeader = 'Point of Sale Receipt',
-    this.receiptFooter = 'Thank you for your business!',
     this.mode = PosBusinessMode.retail,
     WorkerUiGuardrails? guardrails,
   }) : guardrails = guardrails ??
@@ -39,54 +35,85 @@ class OdooCompanyProfile {
   bool get isRetail => mode.isRetail;
   bool get isFnb => mode.isFnb;
 
-  static const OdooCompanyProfile defaultDemoProfile = OdooCompanyProfile(
-    displayName: 'Main Store POS',
-    login: 'admin',
-    password: '',
-    companyId: 1,
-    posConfigId: 1,
-    receiptHeader: 'Point of Sale Receipt',
-    receiptFooter: 'Thank you for your business!',
-    mode: PosBusinessMode.retail,
-  );
-
-  static const List<OdooCompanyProfile> availableProfiles = [
-    defaultDemoProfile,
-  ];
-
-  Map<String, dynamic> toMap() => {
-        'displayName': displayName,
-        'login': login,
-        'password': password,
-        'companyId': companyId,
-        'posConfigId': posConfigId,
-        'receiptHeader': receiptHeader,
-        'receiptFooter': receiptFooter,
-        'mode': mode.name,
-        'guardrails': guardrails.toJson(),
-      };
-
-  factory OdooCompanyProfile.fromMap(Map<String, dynamic> map) {
+  factory OdooCompanyProfile.fromJson(Map<String, dynamic> json) {
+    final compId = (json['company_id'] as num?)?.toInt() ?? 1;
     final parsedMode = PosBusinessMode.fromString(
-      (map['mode'] ?? 'retail').toString(),
+      json['mode']?.toString(),
+      companyId: compId,
     );
     return OdooCompanyProfile(
-      displayName: (map['displayName'] ?? map['display_name'] ?? 'Main Store POS').toString(),
-      login: (map['login'] ?? 'admin').toString(),
-      password: (map['password'] ?? '').toString(),
-      companyId: (map['companyId'] ?? map['company_id'] as num?)?.toInt() ?? 1,
-      posConfigId: (map['posConfigId'] ?? map['pos_config_id'] as num?)?.toInt() ?? 1,
-      receiptHeader: (map['receiptHeader'] ?? map['receipt_header'] ?? 'Point of Sale Receipt').toString(),
-      receiptFooter: (map['receiptFooter'] ?? map['receipt_footer'] ?? 'Thank you for your business!').toString(),
+      displayName: json['display_name']?.toString() ?? 'Store POS',
+      login: json['login']?.toString() ?? '',
+      password: json['password']?.toString() ?? '',
+      companyId: compId,
+      posConfigId: (json['pos_config_id'] as num?)?.toInt() ?? 1,
       mode: parsedMode,
-      guardrails: map['guardrails'] is Map<String, dynamic>
-          ? WorkerUiGuardrails.fromJson(map['guardrails'] as Map<String, dynamic>)
-          : null,
+      guardrails: json['guardrails'] is Map<String, dynamic>
+          ? WorkerUiGuardrails.fromJson(json['guardrails'] as Map<String, dynamic>, mode: parsedMode)
+          : WorkerUiGuardrails.forMode(parsedMode),
     );
   }
 
-  factory OdooCompanyProfile.fromJson(Map<String, dynamic> json) => OdooCompanyProfile.fromMap(json);
-  Map<String, dynamic> toJson() => toMap();
+  Map<String, dynamic> toJson() => {
+        'display_name': displayName,
+        'login': login,
+        'password': password,
+        'company_id': companyId,
+        'pos_config_id': posConfigId,
+        'mode': mode.code,
+        'guardrails': guardrails.toJson(),
+      };
+
+  static const List<OdooCompanyProfile> availableProfiles = [
+    OdooCompanyProfile(
+      displayName: '🏪 Arawali Kasir 1',
+      login: 'agent.arawali',
+      password: 'nDutPPnZ1w3sU-SeaGs',
+      companyId: 1,
+      posConfigId: 2,
+      mode: PosBusinessMode.retail,
+    ),
+    OdooCompanyProfile(
+      displayName: '🏪 Arawali Kasir 2',
+      login: 'agent.arawali',
+      password: 'nDutPPnZ1w3sU-SeaGs',
+      companyId: 1,
+      posConfigId: 1,
+      mode: PosBusinessMode.retail,
+    ),
+    OdooCompanyProfile(
+      displayName: '🥤 PAJ Kartini POS',
+      login: 'agent.kartini',
+      password: 'xABS_sdTDEAFAVydT48',
+      companyId: 6,
+      posConfigId: 14,
+      mode: PosBusinessMode.fnb,
+    ),
+    OdooCompanyProfile(
+      displayName: '🥤 PAJ Santi POS',
+      login: 'agent.santi',
+      password: 'TKb-v6UPr9ru22sXBFk',
+      companyId: 2,
+      posConfigId: 13,
+      mode: PosBusinessMode.fnb,
+    ),
+    OdooCompanyProfile(
+      displayName: '🥤 PAJ SKW POS',
+      login: 'agent.skw',
+      password: 'pcteGagVrB4xi49v7iE',
+      companyId: 7,
+      posConfigId: 15,
+      mode: PosBusinessMode.fnb,
+    ),
+    OdooCompanyProfile(
+      displayName: '🍞 Bakery POS',
+      login: 'agent.bakery',
+      password: 'J3f5XZNLHNBL5Fh4UfI',
+      companyId: 3,
+      posConfigId: 6,
+      mode: PosBusinessMode.fnb,
+    ),
+  ];
 }
 
 class OdooOrderRecord {

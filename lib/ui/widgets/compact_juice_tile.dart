@@ -154,9 +154,9 @@ class CompactJuiceTile extends StatelessWidget {
       alignment: Alignment.center,
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3.5),
       decoration: BoxDecoration(
-        color: AppColors.brandOrangeLight,
+        color: AppColors.arawaliOrangeLight,
         borderRadius: BorderRadius.circular(6),
-        border: Border.all(color: AppColors.brandOrange, width: 1.2),
+        border: Border.all(color: AppColors.arawaliOrange, width: 1.2),
       ),
       child: Text(
         currency.format(effectivePrice),
@@ -165,7 +165,7 @@ class CompactJuiceTile extends StatelessWidget {
         style: const TextStyle(
           fontSize: 11.5,
           fontWeight: FontWeight.w900,
-          color: AppColors.brandDarkRed,
+          color: AppColors.arawaliDarkRed,
         ),
       ),
     );
@@ -199,7 +199,7 @@ class CompactJuiceTile extends StatelessWidget {
                               height: 20,
                               child: CircularProgressIndicator(
                                 strokeWidth: 2,
-                                color: AppColors.brandOrange,
+                                color: AppColors.arawaliOrange,
                               ),
                             ),
                           );
@@ -279,7 +279,7 @@ class CompactJuiceTile extends StatelessWidget {
       return const Icon(
         Icons.add_shopping_cart_rounded,
         size: 14,
-        color: AppColors.brandRed,
+        color: AppColors.arawaliRed,
       );
     }
     final isOut = stock <= 0;

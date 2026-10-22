@@ -28,7 +28,7 @@ class OdooOriginalReceiptTemplate {
     String? trackingNumber,
     Customer? customer,
     String? cashierName,
-    String storeName = 'STORE POS',
+    String storeName = 'ARAWALI',
   }) {
     final doc = EscPosBuilder(cols: cols);
     final meta = config.odooMeta;
@@ -72,7 +72,7 @@ class OdooOriginalReceiptTemplate {
       final prodTitle = isReturn ? '[REFUND] ${item.product.name}' : item.product.name;
       doc.leftLine(prodTitle);
       doc.row(
-        "  ${item.quantity} x ${_currency.format(item.unitPrice)}",
+        "  ${item.quantity} x ${_currency.format(item.originalUnitPrice)}",
         _currency.format(item.lineTotal),
       );
       if (item.discountPercent != null && item.discountPercent! > 0) {
