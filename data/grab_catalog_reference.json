@@ -1,0 +1,730 @@
+{
+  "cinnamon apple": {
+    "grab_id": "IDITE2025121311540897249",
+    "grab_name": "Cinnamon Apple",
+    "target_name": "Cinnamon Apple",
+    "price": 19800,
+    "category": "Noura Bakery",
+    "available": false
+  },
+  "roti tawar": {
+    "grab_id": "IDITE2025122309440854156",
+    "grab_name": "Roti Tawar",
+    "target_name": "Roti Tawar",
+    "price": 20000,
+    "category": "Noura Bakery",
+    "available": false
+  },
+  "apel": {
+    "grab_id": "IDITE20241012041027114212",
+    "grab_name": "Apel",
+    "target_name": "Apel",
+    "price": 19800,
+    "category": "Jus Buah",
+    "available": true
+  },
+  "onigiri tamago": {
+    "grab_id": "IDITE2024111505042003809",
+    "grab_name": "Onigiri Tamago",
+    "target_name": "Onigiri Tamago",
+    "price": 19800,
+    "category": "MAUMAU Japanese Food",
+    "available": false
+  },
+  "glowing a cold pressed juice": {
+    "grab_id": "IDITE2025050907020458029",
+    "grab_name": "GLOWING A Cold Pressed Juice",
+    "target_name": "CP GLOWING A",
+    "price": 40900,
+    "category": "COLD PRESSED JUICE (100% BUAH, 0% AIR/GULA/SKM/PERASA)",
+    "available": true
+  },
+  "creamy vanilla": {
+    "grab_id": "IDITE2025121513463370839",
+    "grab_name": "Creamy Vanilla",
+    "target_name": "Creamy Vanilla",
+    "price": 12500,
+    "category": "Noura Bakery",
+    "available": false
+  },
+  "cranberry chiaseed cream cheese (whole wheat)": {
+    "grab_id": "IDITE2026032404164461279",
+    "grab_name": "Cranberry Chiaseed Cream Cheese (Whole wheat)",
+    "target_name": "Cranberry Chiaseed Cream Cheese (Whole wheat)",
+    "price": 21500,
+    "category": "Noura Bakery",
+    "available": false
+  },
+  "no acne": {
+    "grab_id": "IDITE2025091901332761516",
+    "grab_name": "No Acne",
+    "target_name": "No Acne",
+    "price": 28800,
+    "category": "Detox",
+    "available": true
+  },
+  "d-toxing": {
+    "grab_id": "IDITE20241012041027032576",
+    "grab_name": "D-Toxing",
+    "target_name": "D-Toxing",
+    "price": 27500,
+    "category": "Detox",
+    "available": true
+  },
+  "salted caramel": {
+    "grab_id": "IDITE2026011013331988229",
+    "grab_name": "Salted Caramel",
+    "target_name": "Salted Caramel",
+    "price": 15000,
+    "category": "Noura Bakery",
+    "available": false
+  },
+  "kaya toast": {
+    "grab_id": "IDITE2025021012235137319",
+    "grab_name": "Kaya Toast",
+    "target_name": "Kaya Toast",
+    "price": 16500,
+    "category": "MAUMAU KOPITIAM",
+    "available": true
+  },
+  "mix 2 buah": {
+    "grab_id": "IDITE20241012041028237054",
+    "grab_name": "Mix 2 Buah",
+    "target_name": "MIX 2",
+    "price": 23000,
+    "category": "Jus Buah",
+    "available": true
+  },
+  "strawberry": {
+    "grab_id": "IDITE20241012041029304837",
+    "grab_name": "Strawberry",
+    "target_name": "Strawberry",
+    "price": 19800,
+    "category": "Jus Buah",
+    "available": true
+  },
+  "kelapa": {
+    "grab_id": "IDITE20241012041028194064",
+    "grab_name": "Kelapa",
+    "target_name": "Kelapa",
+    "price": 19800,
+    "category": "Jus Buah",
+    "available": false
+  },
+  "tuna mayo": {
+    "grab_id": "IDITE2026041112491872643",
+    "grab_name": "Tuna Mayo",
+    "target_name": "Tuna Mayo",
+    "price": 18990,
+    "category": "Noura Bakery",
+    "available": true
+  },
+  "pisang keju": {
+    "grab_id": "IDITE2025122711593074806",
+    "grab_name": "Pisang Keju",
+    "target_name": "Pisang Keju",
+    "price": 16500,
+    "category": "Noura Bakery",
+    "available": false
+  },
+  "nanas": {
+    "grab_id": "IDITE20241012041028255163",
+    "grab_name": "Nanas",
+    "target_name": "Nanas",
+    "price": 19800,
+    "category": "Jus Buah",
+    "available": true
+  },
+  "avomood": {
+    "grab_id": "IDITE2024112110422779794",
+    "grab_name": "Avomood",
+    "target_name": "Avomood",
+    "price": 47800,
+    "category": "Smoothies Bowl Series",
+    "available": true
+  },
+  "wortel": {
+    "grab_id": "IDITE20241012041029338824",
+    "grab_name": "Wortel",
+    "target_name": "Wortel",
+    "price": 19800,
+    "category": "Jus Buah",
+    "available": true
+  },
+  "reduce cholestrol cold pressed juice": {
+    "grab_id": "IDITE2025071009013339558",
+    "grab_name": "REDUCE CHOLESTROL Cold Pressed Juice",
+    "target_name": "CP REDUCE CHOLESTROL",
+    "price": 38500,
+    "category": "COLD PRESSED JUICE (100% BUAH, 0% AIR/GULA/SKM/PERASA)",
+    "available": true
+  },
+  "japanese roll cake (chocolate)": {
+    "grab_id": "IDITE2026061108482793258",
+    "grab_name": "Japanese Roll Cake (Chocolate)",
+    "target_name": "Japanese Roll Cake (Chocolate)",
+    "price": 47500,
+    "category": "Noura Bakery",
+    "available": true
+  },
+  "pepaya": {
+    "grab_id": "IDITE20241012041028266824",
+    "grab_name": "Pepaya",
+    "target_name": "Pepaya",
+    "price": 19800,
+    "category": "Jus Buah",
+    "available": true
+  },
+  "gout free cold pressed juice": {
+    "grab_id": "IDITE2025051208223100423",
+    "grab_name": "GOUT FREE Cold Pressed Juice",
+    "target_name": "CP GOUT FREE",
+    "price": 41900,
+    "category": "COLD PRESSED JUICE (100% BUAH, 0% AIR/GULA/SKM/PERASA)",
+    "available": true
+  },
+  "garlic cheese": {
+    "grab_id": "IDITE2025120701471379829",
+    "grab_name": "Garlic Cheese",
+    "target_name": "Garlic Cheese",
+    "price": 15500,
+    "category": "Noura Bakery",
+    "available": true
+  },
+  "pinky crunch": {
+    "grab_id": "IDITE2026040212222579223",
+    "grab_name": "Pinky Crunch",
+    "target_name": "Pinky Crunch",
+    "price": 45500,
+    "category": "Smoothies Bowl Series",
+    "available": true
+  },
+  "alpukat": {
+    "grab_id": "IDITE20241012041027109284",
+    "grab_name": "Alpukat",
+    "target_name": "Alpukat",
+    "price": 23000,
+    "category": "Jus Buah",
+    "available": true
+  },
+  "cheesy bite": {
+    "grab_id": "IDITE2025122712321049145",
+    "grab_name": "Cheesy Bite",
+    "target_name": "Cheesy Bite",
+    "price": 15000,
+    "category": "Noura Bakery",
+    "available": true
+  },
+  "kacang merah": {
+    "grab_id": "IDITE2025120911255797448",
+    "grab_name": "Kacang Merah",
+    "target_name": "Kacang Merah",
+    "price": 12500,
+    "category": "Noura Bakery",
+    "available": true
+  },
+  "semangka": {
+    "grab_id": "IDITE20241012041029284228",
+    "grab_name": "Semangka",
+    "target_name": "Semangka",
+    "price": 19800,
+    "category": "Jus Buah",
+    "available": true
+  },
+  "ube soft bun": {
+    "grab_id": "IDITE2026040213022126654",
+    "grab_name": "Ube Soft Bun",
+    "target_name": "Ube Soft Bun",
+    "price": 15500,
+    "category": "Noura Bakery",
+    "available": true
+  },
+  "d-toxing cold pressed juice": {
+    "grab_id": "IDITE2025050907000057932",
+    "grab_name": "D-TOXING Cold Pressed Juice",
+    "target_name": "CP D-TOXING",
+    "price": 43800,
+    "category": "COLD PRESSED JUICE (100% BUAH, 0% AIR/GULA/SKM/PERASA)",
+    "available": true
+  },
+  "avocoffee": {
+    "grab_id": "IDITE20241012041027123776",
+    "grab_name": "AvoCoffee",
+    "target_name": "AvoCoffee",
+    "price": 35000,
+    "category": "Coffee",
+    "available": true
+  },
+  "sirsak": {
+    "grab_id": "IDITE20241012041029293011",
+    "grab_name": "Sirsak",
+    "target_name": "Sirsak",
+    "price": 19800,
+    "category": "Jus Buah",
+    "available": true
+  },
+  "nutella": {
+    "grab_id": "IDITE2025121508023620382",
+    "grab_name": "Nutella",
+    "target_name": "Nutella",
+    "price": 16800,
+    "category": "Noura Bakery",
+    "available": false
+  },
+  "timun": {
+    "grab_id": "IDITE20241012041029316110",
+    "grab_name": "Timun",
+    "target_name": "Timun",
+    "price": 19800,
+    "category": "Jus Buah",
+    "available": true
+  },
+  "mango japanese roll cake": {
+    "grab_id": "IDITE2026061003190951702",
+    "grab_name": "Mango Japanese Roll Cake",
+    "target_name": "Mango Japanese Roll Cake",
+    "price": 47500,
+    "category": "Noura Bakery",
+    "available": false
+  },
+  "choco banana": {
+    "grab_id": "IDITE20241012041029354367",
+    "grab_name": "Choco Banana",
+    "target_name": "Choco Banana",
+    "price": 41500,
+    "category": "Protein",
+    "available": true
+  },
+  "japanese roll cake (strawberry)": {
+    "grab_id": "IDITE2026072407063801855",
+    "grab_name": "Japanese Roll Cake (Strawberry)",
+    "target_name": "Japanese Roll Cake (Strawberry)",
+    "price": 47500,
+    "category": "Noura Bakery",
+    "available": true
+  },
+  "pir": {
+    "grab_id": "IDITE20241012041029275676",
+    "grab_name": "Pir",
+    "target_name": "Pir",
+    "price": 19800,
+    "category": "Jus Buah",
+    "available": true
+  },
+  "kale": {
+    "grab_id": "IDITE20241012041028185385",
+    "grab_name": "Kale",
+    "target_name": "Kale",
+    "price": 23000,
+    "category": "Jus Buah",
+    "available": true
+  },
+  "blood up": {
+    "grab_id": "IDITE20241012041026010849",
+    "grab_name": "Blood Up",
+    "target_name": "Blood Up",
+    "price": 30000,
+    "category": "Detox",
+    "available": true
+  },
+  "glowing a": {
+    "grab_id": "IDITE20241012041027041124",
+    "grab_name": "Glowing A",
+    "target_name": "Glowing A",
+    "price": 27500,
+    "category": "Detox",
+    "available": true
+  },
+  "mix 3 buah": {
+    "grab_id": "IDITE20241012041028247485",
+    "grab_name": "Mix 3 Buah",
+    "target_name": "MIX 3",
+    "price": 25000,
+    "category": "Jus Buah",
+    "available": true
+  },
+  "korean sausage": {
+    "grab_id": "IDITE2026041114031914567",
+    "grab_name": "Korean Sausage",
+    "target_name": "Korean Sausage",
+    "price": 19800,
+    "category": "Noura Bakery",
+    "available": true
+  },
+  "gout free": {
+    "grab_id": "IDITE2025040907193445232",
+    "grab_name": "GOUT FREE",
+    "target_name": "GOUT FREE",
+    "price": 28800,
+    "category": "Detox",
+    "available": true
+  },
+  "blood up cold pressed juice": {
+    "grab_id": "IDITE2025050907094887921",
+    "grab_name": "BLOOD UP Cold Pressed Juice",
+    "target_name": "CP BLOOD UP",
+    "price": 48500,
+    "category": "COLD PRESSED JUICE (100% BUAH, 0% AIR/GULA/SKM/PERASA)",
+    "available": true
+  },
+  "tensi calmer cold pressed juice": {
+    "grab_id": "IDITE2025071008591603291",
+    "grab_name": "TENSI CALMER Cold Pressed Juice",
+    "target_name": "CP TENSI CALMER",
+    "price": 45800,
+    "category": "COLD PRESSED JUICE (100% BUAH, 0% AIR/GULA/SKM/PERASA)",
+    "available": true
+  },
+  "onigiri kani mayo": {
+    "grab_id": "IDITE2024111505033347744",
+    "grab_name": "Onigiri Kani Mayo",
+    "target_name": "Onigiri Kani Mayo",
+    "price": 19800,
+    "category": "MAUMAU Japanese Food",
+    "available": false
+  },
+  "jagung": {
+    "grab_id": "IDITE20241012041028153218",
+    "grab_name": "Jagung",
+    "target_name": "Jagung",
+    "price": 19800,
+    "category": "Jus Buah",
+    "available": false
+  },
+  "crunch o'peanut": {
+    "grab_id": "IDITE2026052311005548591",
+    "grab_name": "Crunch O'peanut",
+    "target_name": "Crunch O'peanut",
+    "price": 16900,
+    "category": "Noura Bakery",
+    "available": false
+  },
+  "boost co": {
+    "grab_id": "IDITE20241012041027027674",
+    "grab_name": "Boost Co",
+    "target_name": "Boost Co",
+    "price": 31500,
+    "category": "Detox",
+    "available": false
+  },
+  "onigiri tuna mayo": {
+    "grab_id": "IDITE2024121806591170301",
+    "grab_name": "onigiri tuna mayo",
+    "target_name": "onigiri tuna mayo",
+    "price": 23000,
+    "category": "MAUMAU Japanese Food",
+    "available": false
+  },
+  "strawberry toast": {
+    "grab_id": "IDITE2025072208302254995",
+    "grab_name": "Strawberry Toast",
+    "target_name": "Strawberry Toast",
+    "price": 16500,
+    "category": "MAUMAU KOPITIAM",
+    "available": true
+  },
+  "almond cream burst": {
+    "grab_id": "IDITE2025120701562274225",
+    "grab_name": "Almond Cream Burst",
+    "target_name": "Almond Cream Burst",
+    "price": 19800,
+    "category": "Noura Bakery",
+    "available": false
+  },
+  "crispy cheese sausage": {
+    "grab_id": "IDITE2026092111441338491",
+    "grab_name": "Crispy Cheese Sausage",
+    "target_name": "Crispy Cheese Sausage",
+    "price": 19800,
+    "category": "Noura Bakery",
+    "available": false
+  },
+  "avosaurus": {
+    "grab_id": "IDITE2025110510453306449",
+    "grab_name": "Avosaurus",
+    "target_name": "Avosaurus",
+    "price": 28800,
+    "category": "Jus Buah",
+    "available": true
+  },
+  "mangga": {
+    "grab_id": "IDITE20241012041028213317",
+    "grab_name": "Mangga",
+    "target_name": "Mangga",
+    "price": 19800,
+    "category": "Jus Buah",
+    "available": true
+  },
+  "beef floss": {
+    "grab_id": "IDITE2026040813221627403",
+    "grab_name": "Beef Floss",
+    "target_name": "Beef Floss",
+    "price": 19800,
+    "category": "Noura Bakery",
+    "available": true
+  },
+  "jambu merah / guava": {
+    "grab_id": "IDITE20241012041028165613",
+    "grab_name": "Jambu Merah / Guava",
+    "target_name": "Jambu Merah / Guava",
+    "price": 19800,
+    "category": "Jus Buah",
+    "available": false
+  },
+  "melon": {
+    "grab_id": "IDITE20241012041028225764",
+    "grab_name": "Melon",
+    "target_name": "Melon",
+    "price": 19800,
+    "category": "Jus Buah",
+    "available": true
+  },
+  "beat cancer cold pressed juice": {
+    "grab_id": "IDITE2025050907083696470",
+    "grab_name": "BEAT CANCER Cold Pressed Juice",
+    "target_name": "CP BEAT CANCER",
+    "price": 46900,
+    "category": "COLD PRESSED JUICE (100% BUAH, 0% AIR/GULA/SKM/PERASA)",
+    "available": true
+  },
+  "butter bun": {
+    "grab_id": "IDITE2025121513423721448",
+    "grab_name": "Butter Bun",
+    "target_name": "Butter Bun",
+    "price": 15500,
+    "category": "Noura Bakery",
+    "available": false
+  },
+  "beat cancer": {
+    "grab_id": "IDITE2024101307074273810",
+    "grab_name": "Beat Cancer",
+    "target_name": "Beat Cancer",
+    "price": 34000,
+    "category": "Detox",
+    "available": true
+  },
+  "buah naga": {
+    "grab_id": "IDITE20241012041027148694",
+    "grab_name": "Buah Naga",
+    "target_name": "Buah Naga",
+    "price": 19800,
+    "category": "Jus Buah",
+    "available": true
+  },
+  "menu spesial merdeka (2 gelas mix strawberry+sirsak)": {
+    "grab_id": "IDITE2025081409225223576",
+    "grab_name": "Menu Spesial Merdeka (2 gelas mix Strawberry+sirsak)",
+    "target_name": "Menu Spesial Merdeka (2 gelas mix Strawberry+sirsak)",
+    "price": 32800,
+    "category": "PROMO SPECIAL",
+    "available": false
+  },
+  "french fries": {
+    "grab_id": "IDITE2025111705430891856",
+    "grab_name": "French Fries",
+    "target_name": "French Fries",
+    "price": 25000,
+    "category": "MAUMAU Japanese Food",
+    "available": true
+  },
+  "jeruk": {
+    "grab_id": "IDITE20241012041028176096",
+    "grab_name": "Jeruk",
+    "target_name": "Jeruk",
+    "price": 19800,
+    "category": "Jus Buah",
+    "available": false
+  },
+  "peanut toast": {
+    "grab_id": "IDITE2025072208234035084",
+    "grab_name": "Peanut Toast",
+    "target_name": "Peanut Toast",
+    "price": 16500,
+    "category": "MAUMAU KOPITIAM",
+    "available": false
+  },
+  "peach japanese roll cake": {
+    "grab_id": "IDITE2026061010024289244",
+    "grab_name": "Peach Japanese Roll Cake",
+    "target_name": "Peach Japanese Roll Cake",
+    "price": 47500,
+    "category": "Noura Bakery",
+    "available": false
+  },
+  "blueberry cheese cream": {
+    "grab_id": "IDITE2026010608401532798",
+    "grab_name": "Blueberry Cheese Cream",
+    "target_name": "Blueberry Cheese Cream",
+    "price": 16500,
+    "category": "Noura Bakery",
+    "available": false
+  },
+  "choco avocado": {
+    "grab_id": "IDITE20241012041029345540",
+    "grab_name": "Choco Avocado",
+    "target_name": "Choco Avocado",
+    "price": 45000,
+    "category": "Protein",
+    "available": true
+  },
+  "smoked beef": {
+    "grab_id": "IDITE2026011103160333476",
+    "grab_name": "Smoked Beef",
+    "target_name": "Smoked Beef",
+    "price": 19800,
+    "category": "Noura Bakery",
+    "available": true
+  },
+  "reduce cholesterol": {
+    "grab_id": "IDITE20241012041027054286",
+    "grab_name": "Reduce Cholesterol",
+    "target_name": "Reduce Cholesterol",
+    "price": 25000,
+    "category": "Detox",
+    "available": true
+  },
+  "multigrain bun (whole wheat)": {
+    "grab_id": "IDITE2026040814434403254",
+    "grab_name": "Multigrain Bun (Whole Wheat)",
+    "target_name": "Multigrain Bun (Whole Wheat)",
+    "price": 20000,
+    "category": "Noura Bakery",
+    "available": false
+  },
+  "classic choco bun": {
+    "grab_id": "IDITE2025120915370476205",
+    "grab_name": "Classic Choco Bun",
+    "target_name": "Classic Choco Bun",
+    "price": 12500,
+    "category": "Noura Bakery",
+    "available": false
+  },
+  "dragomood": {
+    "grab_id": "IDITE2024111606343807914",
+    "grab_name": "Dragomood",
+    "target_name": "Dragomood",
+    "price": 43900,
+    "category": "Smoothies Bowl Series",
+    "available": false
+  },
+  "pisang": {
+    "grab_id": "IDITE2024110209224803973",
+    "grab_name": "Pisang",
+    "target_name": "Pisang",
+    "price": 19800,
+    "category": "Jus Buah",
+    "available": true
+  },
+  "bit": {
+    "grab_id": "IDITE20241012041027135421",
+    "grab_name": "Bit",
+    "target_name": "Bit",
+    "price": 25000,
+    "category": "Jus Buah",
+    "available": true
+  },
+  "roti sosis": {
+    "grab_id": "IDITE2026050706322719144",
+    "grab_name": "Roti Sosis",
+    "target_name": "Roti Sosis",
+    "price": 12500,
+    "category": "Noura Bakery",
+    "available": false
+  },
+  "choco toast": {
+    "grab_id": "IDITE2025021012310004523",
+    "grab_name": "Choco Toast",
+    "target_name": "Choco Toast",
+    "price": 16500,
+    "category": "MAUMAU KOPITIAM",
+    "available": true
+  },
+  "tropical bliss": {
+    "grab_id": "IDITE2024120501153898564",
+    "grab_name": "TROPICAL BLISS",
+    "target_name": "TROPICAL BLISS",
+    "price": 45500,
+    "category": "Smoothies Bowl Series",
+    "available": true
+  },
+  "tensi calmer": {
+    "grab_id": "IDITE20241012041027067736",
+    "grab_name": "Tensi Calmer",
+    "target_name": "Tensi Calmer",
+    "price": 30000,
+    "category": "Detox",
+    "available": true
+  },
+  "mix french fries + sosis": {
+    "grab_id": "IDITE2025111705443393694",
+    "grab_name": "Mix French Fries + Sosis",
+    "target_name": "Mix French Fries + Sosis",
+    "price": 31500,
+    "category": "MAUMAU Japanese Food",
+    "available": true
+  },
+  "shake pro": {
+    "grab_id": "IDITE20241012041029369437",
+    "grab_name": "Shake Pro",
+    "target_name": "Shake Pro",
+    "price": 36500,
+    "category": "Protein",
+    "available": true
+  },
+  "sausage roll bun": {
+    "grab_id": "IDITE2025120911412942367",
+    "grab_name": "Sausage Roll Bun",
+    "target_name": "Sausage Roll Bun",
+    "price": 15500,
+    "category": "Noura Bakery",
+    "available": false
+  },
+  "tomat": {
+    "grab_id": "IDITE20241012041029329261",
+    "grab_name": "Tomat",
+    "target_name": "Tomat",
+    "price": 19800,
+    "category": "Jus Buah",
+    "available": true
+  },
+  "roti keju manis": {
+    "grab_id": "IDITE2025120915453592513",
+    "grab_name": "Roti Keju Manis",
+    "target_name": "KEJU",
+    "price": 12500,
+    "category": "Noura Bakery",
+    "available": true
+  },
+  "pisang coklat": {
+    "grab_id": "IDITE2025122711590248364",
+    "grab_name": "Pisang Coklat",
+    "target_name": "Pisang Coklat",
+    "price": 16500,
+    "category": "Noura Bakery",
+    "available": false
+  },
+  "lemon": {
+    "grab_id": "IDITE20241012041028200731",
+    "grab_name": "Lemon",
+    "target_name": "Lemon",
+    "price": 23000,
+    "category": "Jus Buah",
+    "available": true
+  },
+  "onigiri sosis bbq": {
+    "grab_id": "IDITE2024111505050384246",
+    "grab_name": "Onigiri Sosis BBQ",
+    "target_name": "Onigiri Sosis BBQ",
+    "price": 19800,
+    "category": "MAUMAU Japanese Food",
+    "available": false
+  },
+  "roti pizza sosis": {
+    "grab_id": "IDITE2025120915294525924",
+    "grab_name": "Roti Pizza Sosis",
+    "target_name": "Roti Pizza Sosis",
+    "price": 15500,
+    "category": "Noura Bakery",
+    "available": false
+  }
+}
