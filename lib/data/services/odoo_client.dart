@@ -511,6 +511,33 @@ class OdooClient {
           }
         } catch (_) {}
       }
+
+      // Handle Odoo 19 "Force Close Session" imbalance wizard
+      if (closeRes['message'] == 'Force Close Session' || closeRes['redirect'] == true) {
+        try {
+          final wizards = await executeKw(
+            'pos.close.session.wizard',
+            'search_read',
+            [[]],
+            {'fields': ['id', 'amount_to_balance', 'account_id'], 'order': 'id desc', 'limit': 1},
+          );
+          if (wizards is List && wizards.isNotEmpty) {
+            final wizardId = wizards[0]['id'];
+            await executeKw(
+              'pos.close.session.wizard',
+              'close_session',
+              [[wizardId]],
+              {'context': {'active_ids': [sessionId], 'active_model': 'pos.session'}},
+            );
+            _activeSessionId = null;
+            _activeSessionName = null;
+            return;
+          }
+        } catch (wizErr) {
+          debugPrint('Error force-closing session via wizard: $wizErr');
+        }
+      }
+
       throw Exception(closeRes['message'] ?? 'Failed to close POS session in Odoo.');
     }
 
