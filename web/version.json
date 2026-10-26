@@ -1,13 +1,15 @@
 {
-  "version_code": 3,
-  "version_name": "1.0.2",
-  "web_version": "1.0.2",
+  "version_code": 4,
+  "version_name": "1.0.3",
+  "web_version": "1.0.3",
   "apk_url": "/app-release.apk",
-  "release_date": "2026-10-12",
+  "windows_zip_url": "/AraPOS_windows_x64.zip",
+  "linux_tar_url": "/AraPOS_Modular_Linux_x64.tar.gz",
+  "release_date": "2026-10-26",
   "release_notes": [
-    "Initial Open Odoo POS Release",
-    "Modular receipt templates driven by receipt_config.json (optional standard Odoo format)",
-    "Added on-screen logo branding on order tickets and dialogs",
-    "Full English translation of all POS cashier dialogs"
+    "Auto-force-close session discrepancies <= Rp 1,000 without blocking cashiers",
+    "Interactive acknowledge & force-close dialog with exact difference in IDR",
+    "In-app desktop self-updater for Windows and Linux cashier terminals",
+    "Multi-tier update server fallbacks with direct GitHub upstream resolution"
   ]
 }

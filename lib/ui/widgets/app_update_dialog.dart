@@ -51,7 +51,6 @@ class _AppUpdateDialogState extends State<AppUpdateDialog> {
     });
 
     try {
-      // Resolve APK absolute URL
       String apkUrl = widget.versionInfo.apkUrl;
       if (!apkUrl.startsWith('http')) {
         String base = widget.serverBaseUrl;
@@ -84,9 +83,55 @@ class _AppUpdateDialogState extends State<AppUpdateDialog> {
     }
   }
 
+  Future<void> _startDesktopUpdate() async {
+    setState(() {
+      _isDownloading = true;
+      _errorMessage = null;
+      _progress = 0.0;
+    });
+
+    try {
+      final isWin = !kIsWeb && defaultTargetPlatform == TargetPlatform.windows;
+      String pkgPath = isWin ? widget.versionInfo.windowsZipUrl : widget.versionInfo.linuxTarUrl;
+      String downloadUrl = pkgPath;
+
+      if (!downloadUrl.startsWith('http')) {
+        String base = widget.serverBaseUrl;
+        if (base.contains(':8069')) {
+          final host = Uri.parse(base).host;
+          base = 'http://$host:8089';
+        }
+        downloadUrl = '$base$downloadUrl';
+      }
+
+      await AppUpdateService.downloadAndApplyDesktopUpdate(
+        downloadUrl: downloadUrl,
+        onProgress: (progress, received, total) {
+          if (mounted) {
+            setState(() {
+              _progress = progress;
+              _receivedBytes = received;
+              _totalBytes = total;
+            });
+          }
+        },
+      );
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _isDownloading = false;
+          _errorMessage = e.toString();
+        });
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final info = widget.versionInfo;
+    final isDesktop = !kIsWeb &&
+        (defaultTargetPlatform == TargetPlatform.windows || defaultTargetPlatform == TargetPlatform.linux || defaultTargetPlatform == TargetPlatform.macOS);
+    final isAndroid = !kIsWeb && defaultTargetPlatform == TargetPlatform.android;
 
     return Dialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
@@ -232,7 +277,9 @@ class _AppUpdateDialogState extends State<AppUpdateDialog> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
-                          'Downloading APK (${(_progress * 100).toInt()}%)...',
+                          _progress >= 1.0
+                              ? 'Extracting update and restarting POS...'
+                              : 'Downloading Update (${(_progress * 100).toInt()}%)...',
                           style: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.bold),
                         ),
                         if (_totalBytes > 0)
@@ -254,7 +301,9 @@ class _AppUpdateDialogState extends State<AppUpdateDialog> {
                     ),
                     const SizedBox(height: 6),
                     Text(
-                      'Once completed, the Android Package Installer will open automatically.',
+                      isDesktop
+                          ? 'Once downloaded, the application will extract the update and restart automatically.'
+                          : 'Once completed, the Android Package Installer will open automatically.',
                       style: TextStyle(fontSize: 11, fontStyle: FontStyle.italic, color: Colors.grey.shade600),
                     ),
                   ],
@@ -301,7 +350,7 @@ class _AppUpdateDialogState extends State<AppUpdateDialog> {
                           AppUpdateService.reloadWebApp();
                         },
                       ),
-                    ] else ...[
+                    ] else if (isAndroid) ...[
                       // Android Native Button: Download & Install
                       ElevatedButton.icon(
                         icon: const Icon(Icons.download_rounded, size: 18),
@@ -312,6 +361,18 @@ class _AppUpdateDialogState extends State<AppUpdateDialog> {
                           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                         ),
                         onPressed: _startAndroidUpdate,
+                      ),
+                    ] else ...[
+                      // Desktop Button (Windows / Linux): Download & Restart
+                      ElevatedButton.icon(
+                        icon: const Icon(Icons.system_update_alt_rounded, size: 18),
+                        label: const Text('Update & Restart POS Now', style: TextStyle(fontWeight: FontWeight.bold)),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.primaryGreen,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                        ),
+                        onPressed: _startDesktopUpdate,
                       ),
                     ],
                   ],
