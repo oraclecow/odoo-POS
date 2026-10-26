@@ -386,3 +386,39 @@ class PosOrderSubmissionResult {
     return PosOrderSubmissionResult(raw: {'result': result});
   }
 }
+
+/// Result returned when a POS session is closed in Odoo
+class PosCloseResult {
+  final bool success;
+  final bool autoForceClosed;
+  final double? amountBalanced;
+  final String? message;
+
+  const PosCloseResult({
+    required this.success,
+    this.autoForceClosed = false,
+    this.amountBalanced,
+    this.message,
+  });
+}
+
+/// Exception thrown when closing POS session encounters an accounting imbalance
+/// that exceeds the auto-close threshold (Rp 1.000) and requires user acknowledgment.
+class PosDiscrepancyException implements Exception {
+  final int sessionId;
+  final int? wizardId;
+  final double amountToBalance;
+  final String message;
+
+  const PosDiscrepancyException({
+    required this.sessionId,
+    this.wizardId,
+    required this.amountToBalance,
+    required this.message,
+  });
+
+  @override
+  String toString() =>
+      'PosDiscrepancyException: Selisih pembukuan Odoo Rp ${amountToBalance.toStringAsFixed(0)} ($message)';
+}
+

@@ -260,13 +260,13 @@ class _OpenSessionDialogState extends ConsumerState<OpenSessionDialog> {
   }
 
   // --- CLOSE REGISTER & POST TO ODOO ---
-  Future<void> _handleCloseSession() async {
+  Future<void> _handleCloseSession({bool forceClose = false}) async {
     if (_closingData == null) return;
 
     final diff = _countedCash - _closingData!.expectedCash;
 
-    // If difference is non-zero, ask confirmation
-    if (diff != 0) {
+    // If difference is non-zero, ask confirmation (skip if already force closing)
+    if (diff != 0 && !forceClose) {
       final confirmed = await showDialog<bool>(
         context: context,
         builder: (ctx) => AlertDialog(
@@ -325,8 +325,11 @@ class _OpenSessionDialogState extends ConsumerState<OpenSessionDialog> {
     try {
       final sessionName = widget.controller.activeSessionName ?? '#${widget.controller.activeSessionId}';
 
-      // 1. Submit close to Odoo ORM
-      await widget.controller.closeSession(countedCash: _countedCash);
+      // 1. Submit close to Odoo ORM (with automatic or explicit force close support)
+      final closeResult = await widget.controller.closeSession(
+        countedCash: _countedCash,
+        forceClose: forceClose,
+      );
 
       // 2. Auto-print Session Close report slip
       Map<String, dynamic>? printRes;
@@ -347,17 +350,29 @@ class _OpenSessionDialogState extends ConsumerState<OpenSessionDialog> {
       if (mounted) {
         Navigator.pop(context, true);
         final printOk = printRes != null && printRes['success'] == true;
+        final extraNote = closeResult.autoForceClosed && (closeResult.amountBalanced != null && closeResult.amountBalanced != 0)
+            ? ' (Force close selisih pembukuan ${_currency.format(closeResult.amountBalanced!.abs())})'
+            : '';
+
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             backgroundColor: printOk ? AppColors.primaryGreen : Colors.orange.shade800,
             duration: Duration(seconds: printOk ? 3 : 6),
             content: Text(
               printOk
-                  ? 'Sesi $sessionName berhasil ditutup dan Laporan Penutupan Kasir telah dicetak!'
-                  : 'Sesi $sessionName ditutup di Odoo, namun cetak Laporan gagal: ${printRes?['message'] ?? 'Printer tidak merespon'}. Anda dapat mencetak ulang dari menu.',
+                  ? 'Sesi $sessionName berhasil ditutup$extraNote dan Laporan Penutupan Kasir telah dicetak!'
+                  : 'Sesi $sessionName ditutup di Odoo$extraNote, namun cetak Laporan gagal: ${printRes?['message'] ?? 'Printer tidak merespon'}. Anda dapat mencetak ulang dari menu.',
             ),
           ),
         );
+      }
+    } on PosDiscrepancyException catch (de) {
+      if (mounted) {
+        setState(() {
+          _isSubmitting = false;
+          _errorMessage = 'Selisih pembukuan Odoo terdeteksi: ${_currency.format(de.amountToBalance.abs())}. Silakan konfirmasi Tutup Paksa.';
+        });
+        _promptAcknowledgeDiscrepancy(de);
       }
     } catch (e) {
       if (mounted) {
@@ -366,6 +381,75 @@ class _OpenSessionDialogState extends ConsumerState<OpenSessionDialog> {
           _errorMessage = e.toString().replaceFirst('Exception: ', '');
         });
       }
+    }
+  }
+
+  Future<void> _promptAcknowledgeDiscrepancy(PosDiscrepancyException de) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      barrierDismissible: false,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: Row(
+          children: [
+            Icon(Icons.warning_amber_rounded, color: Colors.orange.shade800, size: 26),
+            const SizedBox(width: 8),
+            const Text('Acknowledge Selisih Pembukuan', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 17)),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Odoo mendeteksi perbedaan pembukuan jurnal move saat penutupan register:',
+              style: TextStyle(fontSize: 13, color: AppColors.textPrimary),
+            ),
+            const SizedBox(height: 10),
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+              decoration: BoxDecoration(
+                color: Colors.orange.shade50,
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: Colors.orange.shade300),
+              ),
+              child: Text(
+                'Selisih: ${_currency.format(de.amountToBalance)}',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.orange.shade900,
+                ),
+              ),
+            ),
+            const SizedBox(height: 10),
+            const Text(
+              'Penyebab umum: Pembulatan diskon atau selisih tarif pajak multi-item.\n\nApakah Anda ingin mengonfirmasi (acknowledge) dan menutup paksa (force close) sesi ini sekarang dari kasir tanpa perlu membuka Odoo web?',
+              style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Batal / Periksa Lagi'),
+          ),
+          ElevatedButton.icon(
+            onPressed: () => Navigator.pop(ctx, true),
+            icon: const Icon(Icons.flash_on_rounded, size: 16),
+            label: const Text('Acknowledge & Force Close'),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.orange.shade800,
+              foregroundColor: Colors.white,
+            ),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true && mounted) {
+      _handleCloseSession(forceClose: true);
     }
   }
 
@@ -427,6 +511,7 @@ class _OpenSessionDialogState extends ConsumerState<OpenSessionDialog> {
                   onKeypadAdd: _onClosingKeypadAdd,
                   onSetExactCash: _onClosingExact,
                   onSubmitClose: _handleCloseSession,
+                  onForceClose: () => _handleCloseSession(forceClose: true),
                 ),
             ],
           ),

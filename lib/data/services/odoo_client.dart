@@ -475,10 +475,14 @@ class OdooClient {
     return PosClosingControlData.fromJson(raw);
   }
 
-  // Close POS session in Odoo 19: posts counted cash and executes close_session_from_ui
-  Future<void> closeSession({
+  // Close POS session in Odoo 19: posts counted cash and executes close_session_from_ui.
+  // If an accounting discrepancy / Force Close wizard is triggered:
+  // - If discrepancy <= 1,000 IDR (or forceClose == true): automatically balances and force closes.
+  // - If discrepancy > 1,000 IDR (and forceClose == false): throws PosDiscrepancyException for user acknowledgment.
+  Future<PosCloseResult> closeSession({
     required int sessionId,
     required double countedCash,
+    bool forceClose = false,
   }) async {
     // 1. Post counted cash details to Odoo
     final postRes = await executeKw(
@@ -487,7 +491,11 @@ class OdooClient {
       [[sessionId], countedCash],
     );
     if (postRes is Map && postRes['successful'] == false) {
-      throw Exception(postRes['message'] ?? 'Failed to post closing cash details in Odoo.');
+      final postMsg = (postRes['message'] ?? '').toString().toLowerCase();
+      // Only throw if not an imbalance wizard trigger
+      if (!postMsg.contains('force close') && postRes['redirect'] != true) {
+        throw Exception(postRes['message'] ?? 'Failed to post closing cash details in Odoo.');
+      }
     }
 
     // 2. Validate & close session from UI
@@ -507,35 +515,26 @@ class OdooClient {
           if (retryRes is Map && retryRes['successful'] == true) {
             _activeSessionId = null;
             _activeSessionName = null;
-            return;
+            return const PosCloseResult(success: true);
           }
         } catch (_) {}
       }
 
-      // Handle Odoo 19 "Force Close Session" imbalance wizard
-      if (closeRes['message'] == 'Force Close Session' || closeRes['redirect'] == true) {
-        try {
-          final wizards = await executeKw(
-            'pos.close.session.wizard',
-            'search_read',
-            [[]],
-            {'fields': ['id', 'amount_to_balance', 'account_id'], 'order': 'id desc', 'limit': 1},
-          );
-          if (wizards is List && wizards.isNotEmpty) {
-            final wizardId = wizards[0]['id'];
-            await executeKw(
-              'pos.close.session.wizard',
-              'close_session',
-              [[wizardId]],
-              {'context': {'active_ids': [sessionId], 'active_model': 'pos.session'}},
-            );
-            _activeSessionId = null;
-            _activeSessionName = null;
-            return;
-          }
-        } catch (wizErr) {
-          debugPrint('Error force-closing session via wizard: $wizErr');
-        }
+      // Check if Odoo returned an accounting imbalance / Force Close Session wizard action
+      final msg = (closeRes['message'] ?? '').toString().toLowerCase();
+      final isImbalanceWizard = closeRes['redirect'] == true ||
+          msg.contains('force close') ||
+          msg.contains('tutup paksa') ||
+          msg.contains('difference') ||
+          msg.contains('selisih') ||
+          msg.contains('imbalance');
+
+      if (isImbalanceWizard || forceClose) {
+        return await _handleForceCloseSessionWizard(
+          sessionId: sessionId,
+          forceClose: forceClose,
+          originalMessage: closeRes['message']?.toString() ?? 'Selisih pembukuan Odoo',
+        );
       }
 
       throw Exception(closeRes['message'] ?? 'Failed to close POS session in Odoo.');
@@ -543,6 +542,153 @@ class OdooClient {
 
     _activeSessionId = null;
     _activeSessionName = null;
+    return const PosCloseResult(success: true);
+  }
+
+  // Handle Force Close Session wizard when accounting move is unbalanced
+  Future<PosCloseResult> _handleForceCloseSessionWizard({
+    required int sessionId,
+    required bool forceClose,
+    required String originalMessage,
+  }) async {
+    int? wizardId;
+    double amountToBalance = 0.0;
+    String wizardMessage = originalMessage;
+
+    // 1. Search for the latest pos.close.session.wizard created for this session/user
+    try {
+      final wizards = await executeKw(
+        'pos.close.session.wizard',
+        'search_read',
+        [
+          [
+            if (_uid != null) ['create_uid', '=', _uid],
+          ],
+          ['id', 'amount_to_balance', 'account_id', 'message'],
+        ],
+        {'order': 'id desc', 'limit': 1},
+      );
+      if (wizards is List && wizards.isNotEmpty) {
+        final w = wizards[0] as Map;
+        wizardId = (w['id'] as num?)?.toInt();
+        amountToBalance = ((w['amount_to_balance'] as num?) ?? 0.0).toDouble();
+        if (w['message'] != null && w['message'].toString().trim().isNotEmpty) {
+          wizardMessage = w['message'].toString().trim();
+        }
+      }
+    } catch (e) {
+      debugPrint('Failed to query pos.close.session.wizard with uid: $e');
+    }
+
+    // 2. Fallback search without create_uid filter if not found
+    if (wizardId == null) {
+      try {
+        final wizards = await executeKw(
+          'pos.close.session.wizard',
+          'search_read',
+          [
+            [],
+            ['id', 'amount_to_balance', 'account_id', 'message'],
+          ],
+          {'order': 'id desc', 'limit': 1},
+        );
+        if (wizards is List && wizards.isNotEmpty) {
+          final w = wizards[0] as Map;
+          wizardId = (w['id'] as num?)?.toInt();
+          amountToBalance = ((w['amount_to_balance'] as num?) ?? 0.0).toDouble();
+          if (w['message'] != null && w['message'].toString().trim().isNotEmpty) {
+            wizardMessage = w['message'].toString().trim();
+          }
+        }
+      } catch (e) {
+        debugPrint('Failed to query pos.close.session.wizard fallback: $e');
+      }
+    }
+
+    // 3. Fallback creation of pos.close.session.wizard if not created by Odoo
+    if (wizardId == null) {
+      try {
+        final comp = await executeKw(
+          'res.company',
+          'read',
+          [[profile.companyId], ['account_default_pos_receivable_account_id']],
+        );
+        if (comp is List && comp.isNotEmpty) {
+          final accIdField = comp[0]['account_default_pos_receivable_account_id'];
+          final accountId = (accIdField is List && accIdField.isNotEmpty) ? accIdField[0] : null;
+          if (accountId != null) {
+            final created = await executeKw(
+              'pos.close.session.wizard',
+              'create',
+              [{
+                'amount_to_balance': 0.0,
+                'account_id': accountId,
+                'message': 'Force Close Session auto-balanced',
+              }],
+            );
+            if (created is int) {
+              wizardId = created;
+            }
+          }
+        }
+      } catch (ce) {
+        debugPrint('Failed to create pos.close.session.wizard fallback: $ce');
+      }
+    }
+
+    // 4. Threshold Check:
+    // Discrepancies up to Rp 1.000 (e.g. 2 Rp, 20 Rp rounding issues) are ignored and force-closed automatically.
+    // If discrepancy > Rp 1.000 and user hasn't explicitly acknowledged yet, raise PosDiscrepancyException.
+    const double kAutoCloseDiscrepancyThreshold = 1000.0;
+    final isWithinAutoThreshold = amountToBalance.abs() <= kAutoCloseDiscrepancyThreshold;
+
+    if (!forceClose && !isWithinAutoThreshold) {
+      throw PosDiscrepancyException(
+        sessionId: sessionId,
+        wizardId: wizardId,
+        amountToBalance: amountToBalance,
+        message: wizardMessage,
+      );
+    }
+
+    // 5. Execute wizard close_session to balance the move and close session
+    if (wizardId != null) {
+      try {
+        await executeKw(
+          'pos.close.session.wizard',
+          'close_session',
+          [[wizardId]],
+          {
+            'context': {
+              'active_ids': [sessionId],
+              'active_model': 'pos.session',
+              'allowed_company_ids': [profile.companyId],
+            },
+          },
+        );
+      } catch (wizErr) {
+        debugPrint('Error executing pos.close.session.wizard.close_session: $wizErr');
+      }
+    }
+
+    // 6. Verify that session is closed
+    final checkSession = await executeKw(
+      'pos.session',
+      'read',
+      [[sessionId], ['state']],
+    );
+    if (checkSession is List && checkSession.isNotEmpty && checkSession[0]['state'] == 'closed') {
+      _activeSessionId = null;
+      _activeSessionName = null;
+      return PosCloseResult(
+        success: true,
+        autoForceClosed: true,
+        amountBalanced: amountToBalance,
+        message: 'Sesi berhasil ditutup paksa (Force Close) dengan selisih pembukuan Rp ${amountToBalance.toStringAsFixed(0)}.',
+      );
+    }
+
+    throw Exception('Gagal menutup sesi kasir di Odoo: status sesi belum closed (${checkSession is List && checkSession.isNotEmpty ? checkSession[0]['state'] : 'unknown'}).');
   }
 
   // Fetch list of cashiers from pos.config and hr.employee.public

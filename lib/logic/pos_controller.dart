@@ -235,7 +235,10 @@ class PosController extends ChangeNotifier {
     return await client.fetchClosingControlData(sessionId: _activeSessionId);
   }
 
-  Future<void> closeSession({required double countedCash}) async {
+  Future<PosCloseResult> closeSession({
+    required double countedCash,
+    bool forceClose = false,
+  }) async {
     final client = _repository.odooClient;
     if (client == null) {
       throw Exception('Odoo client not configured');
@@ -243,13 +246,15 @@ class PosController extends ChangeNotifier {
     if (_activeSessionId == null) {
       throw Exception('No active POS session to close');
     }
-    await client.closeSession(
+    final result = await client.closeSession(
       sessionId: _activeSessionId!,
       countedCash: countedCash,
+      forceClose: forceClose,
     );
     _activeSessionId = null;
     _activeSessionName = null;
     notifyListeners();
+    return result;
   }
 
   // Session & Header State

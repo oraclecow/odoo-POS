@@ -17,6 +17,7 @@ class SessionCloseView extends StatelessWidget {
   final VoidCallback onOpenCashOut;
   final VoidCallback onPrintZReport;
   final VoidCallback onSubmitClose;
+  final VoidCallback? onForceClose;
   final ValueChanged<String> onKeypadPress;
   final VoidCallback onKeypadBackspace;
   final VoidCallback onKeypadClear;
@@ -38,6 +39,7 @@ class SessionCloseView extends StatelessWidget {
     required this.onOpenCashOut,
     required this.onPrintZReport,
     required this.onSubmitClose,
+    this.onForceClose,
     required this.onKeypadPress,
     required this.onKeypadBackspace,
     required this.onKeypadClear,
@@ -227,15 +229,20 @@ class SessionCloseView extends StatelessWidget {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Row(
-                          children: [
-                            Icon(Icons.inventory_2_outlined, size: 14, color: Colors.amber.shade900),
-                            const SizedBox(width: 6),
-                            Text(
-                              'Kontrol Uang Kas Laci (Cash Control)',
-                              style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.bold, color: Colors.amber.shade900),
-                            ),
-                          ],
+                        Expanded(
+                          child: Row(
+                            children: [
+                              Icon(Icons.inventory_2_outlined, size: 14, color: Colors.amber.shade900),
+                              const SizedBox(width: 6),
+                              Expanded(
+                                child: Text(
+                                  'Kontrol Uang Kas Laci (Cash Control)',
+                                  style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.bold, color: Colors.amber.shade900),
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                         if (allowCashInOut)
                           InkWell(
@@ -292,19 +299,49 @@ class SessionCloseView extends StatelessWidget {
               if (errorMessage != null) ...[
                 const SizedBox(height: 8),
                 Container(
-                  padding: const EdgeInsets.all(8),
+                  padding: const EdgeInsets.all(10),
                   decoration: BoxDecoration(
                     color: Colors.red.shade50,
                     borderRadius: BorderRadius.circular(8),
                     border: Border.all(color: Colors.red.shade200),
                   ),
-                  child: Row(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Icon(Icons.error_outline_rounded, color: Colors.red, size: 16),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Text(errorMessage!, style: const TextStyle(color: Colors.red, fontSize: 11)),
+                      Row(
+                        children: [
+                          const Icon(Icons.error_outline_rounded, color: Colors.red, size: 16),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(errorMessage!, style: const TextStyle(color: Colors.red, fontSize: 11)),
+                          ),
+                        ],
                       ),
+                      if (onForceClose != null &&
+                          (errorMessage!.toLowerCase().contains('force close') ||
+                           errorMessage!.toLowerCase().contains('selisih') ||
+                           errorMessage!.toLowerCase().contains('tutup paksa') ||
+                           errorMessage!.toLowerCase().contains('difference') ||
+                           errorMessage!.toLowerCase().contains('imbalance'))) ...[
+                        const SizedBox(height: 8),
+                        SizedBox(
+                          width: double.infinity,
+                          child: ElevatedButton.icon(
+                            onPressed: isSubmitting ? null : onForceClose,
+                            icon: const Icon(Icons.flash_on_rounded, size: 14),
+                            label: const Text(
+                              'Acknowledge & Tutup Paksa (Force Close)',
+                              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 11.5),
+                            ),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.orange.shade800,
+                              foregroundColor: Colors.white,
+                              padding: const EdgeInsets.symmetric(vertical: 7, horizontal: 10),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+                            ),
+                          ),
+                        ),
+                      ],
                     ],
                   ),
                 ),
@@ -484,9 +521,12 @@ class SessionCloseView extends StatelessWidget {
           children: [
             Icon(Icons.check_circle_outline_rounded, color: AppColors.primaryGreen, size: 16),
             SizedBox(width: 6),
-            Text(
-              'Selisih Kas: Rp 0 · Pas (Balanced)',
-              style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.primaryGreen, fontSize: 12),
+            Expanded(
+              child: Text(
+                'Selisih Kas: Rp 0 · Pas (Balanced)',
+                style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.primaryGreen, fontSize: 12),
+                overflow: TextOverflow.ellipsis,
+              ),
             ),
           ],
         ),
@@ -505,9 +545,12 @@ class SessionCloseView extends StatelessWidget {
           children: [
             Icon(Icons.info_outline_rounded, color: Colors.amber.shade900, size: 16),
             const SizedBox(width: 6),
-            Text(
-              'Selisih Kas: +${_currency.format(diff)} · Lebih (Surplus)',
-              style: TextStyle(fontWeight: FontWeight.bold, color: Colors.amber.shade900, fontSize: 12),
+            Expanded(
+              child: Text(
+                'Selisih Kas: +${_currency.format(diff)} · Lebih (Surplus)',
+                style: TextStyle(fontWeight: FontWeight.bold, color: Colors.amber.shade900, fontSize: 12),
+                overflow: TextOverflow.ellipsis,
+              ),
             ),
           ],
         ),
@@ -525,9 +568,12 @@ class SessionCloseView extends StatelessWidget {
         children: [
           const Icon(Icons.warning_amber_rounded, color: Colors.red, size: 16),
           const SizedBox(width: 6),
-          Text(
-            'Selisih Kas: -${_currency.format(diff.abs())} · Kurang (Shortage)',
-            style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.red, fontSize: 12),
+          Expanded(
+            child: Text(
+              'Selisih Kas: -${_currency.format(diff.abs())} · Kurang (Shortage)',
+              style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.red, fontSize: 12),
+              overflow: TextOverflow.ellipsis,
+            ),
           ),
         ],
       ),
