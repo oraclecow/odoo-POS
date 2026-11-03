@@ -56,9 +56,9 @@ class _CashInOutDialogState extends State<CashInOutDialog> {
     _type = widget.initialType;
   }
 
-  final _quickAmounts = const [10000, 20000, 50000, 100000];
-  final _quickReasonsOut = const ['Beli Es Batu', 'Beli Galon Air', 'Beli Plastik/Cup', 'Uang Kembalian', 'Operasional'];
-  final _quickReasonsIn = const ['Modal Tambahan', 'Setoran Kas', 'Pengembalian Belanja'];
+  final _quickAmounts = const [50000, 100000];
+  final _quickReasonsOut = const ['Top up Kas Kecil', 'Setoran', 'Operasional'];
+  final _quickReasonsIn = const ['Top up Kas Kecil', 'Setoran', 'Operasional'];
 
   @override
   void dispose() {
@@ -344,7 +344,7 @@ class _CashInOutDialogState extends State<CashInOutDialog> {
                         TextField(
                           controller: _reasonController,
                           decoration: InputDecoration(
-                            hintText: isOut ? 'Alasan lain (e.g. Beli Es Batu)...' : 'Alasan lain (e.g. Modal Tambahan)...',
+                            hintText: isOut ? 'Alasan lain (e.g. Operasional)...' : 'Alasan lain (e.g. Top up Kas Kecil)...',
                             contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                             border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
                           ),
