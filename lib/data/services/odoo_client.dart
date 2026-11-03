@@ -1004,8 +1004,8 @@ class OdooClient {
     ];
 
     if (profile.companyId == 1) {
-      // Strictly Arawali products only: NO PAJ products, NO juices, NO shared unassigned items
-      productDomain.add(['company_id', '=', 1]);
+      // Arawali retail catalog: Arawali products (company 1) and global/shared items (company false) in Arawali Store category
+      productDomain.add(['company_id', 'in', [false, 1]]);
       productDomain.add(['pos_categ_ids', 'in', [5]]);
     } else {
       productDomain.add(['company_id', 'in', [false, profile.companyId]]);
